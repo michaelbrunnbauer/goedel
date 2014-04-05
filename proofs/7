@@ -1,0 +1,8 @@
+x=z;x=z;
+x=z;x=y;y=z;
+x=x;x=y;y=x;
+x=x;
+~x=x;~x=x;
+~x=x;y=x;
+x=y;x=x;y=x;
+x=y;y=x;
