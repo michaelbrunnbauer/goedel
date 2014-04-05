@@ -57,7 +57,7 @@ application of a rule of the calculus on zero, one or two of the preceding
 lines.
 
 The sequent calculus has the following rules. A and B are formulae, t is a
-term, x is a variable, ... and --- are sequences or zero or more formulae.
+term, x is a variable, ... and --- are sequences of zero or more formulae.
 
 1) A formula implies itself:
 
