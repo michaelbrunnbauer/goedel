@@ -121,7 +121,7 @@ term, x is a variable, ... and --- are sequences of zero or more formulae.
 The sequences ..., --- or ... --- in the resulting sequence only have to
 contain the same formulae as ..., --- or ... ---. It is allowed to permutate
 and to introduce or remove repetitions. An additional rule allows to permutate
-to get the required order for a rule:
+to get the required order for rule 5:
 
 12) Permutation
 
