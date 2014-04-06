@@ -136,7 +136,7 @@ There are four types of functions (see functions.py):
 -Basic functions defined by an expression
 
 -Primitive_recursive functions defined by the value for 0 and the value for
- the successor
+ n+1 based on the value for n
 
 -Argmin-functions returning the smallest number within a range 0-max for
  which a function does not return 0 - otherwise 0. These are defined using 
