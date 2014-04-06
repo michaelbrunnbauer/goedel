@@ -128,6 +128,8 @@ rule allows to permutate to get the required order for rule 5:
  ... A
  --- A (Where --- contains the same formulae as ...)
 
+You can find example proofs in the subdirectory proofs.
+
 The primitive recursive definitions use the symbols 0, the successor function
 succ(), the identity = and the numbers 1-255.
 
