@@ -149,7 +149,7 @@ def testsuite():
     assert isformula(gn('!x:(P(a)&a=b)')) == 1
     assert isformula(gn('!!x:(P(a)&a=b)')) == 0
     assert isformula(gn('~!x:(P(a)&a=b)')) == 1
-
+    assert isformula(gn('(P(x)&(P(y)&P(z)))')) == 1
     assert isconjunction(0) == 0
 
     x=gn('x')
