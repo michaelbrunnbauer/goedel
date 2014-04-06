@@ -32,7 +32,7 @@ recombine=basic_function(config,
 subst_term_help=basic_function(config,
  name='subst_term_help',
  desc='n has the form term1 / term2 and term2 is a substitution of t for x in term1',
- define='lambda subst_termlistcode,n,x,t: AND3(isterm(leftfromslash(n)),isterm(rightfromslash(n)),OR3(AND(NOT(isfreeinterm(leftfromslash(n),x)),equal(leftfromslash(n),rightfromslash(n))),AND(equal(leftfromslash(n),x),equal(rightfromslash(n),t)),AND(equal(term_namelc(leftfromslash(n)),term_namelc(rightfromslash(n))),recursive_subst_termlist(subst_termlistcode,recombine(term_termlist(leftfromslash(n)),term_termlist(rightfromslash(n))),x,t))))'
+ define='lambda subst_termlistcode,n,x,t: AND5(isnamelc(x),isterm(t),isterm(leftfromslash(n)),isterm(rightfromslash(n)),OR3(AND(NOT(isfreeinterm(leftfromslash(n),x)),equal(leftfromslash(n),rightfromslash(n))),AND(equal(leftfromslash(n),x),equal(rightfromslash(n),t)),AND(equal(term_namelc(leftfromslash(n)),term_namelc(rightfromslash(n))),recursive_subst_termlist(subst_termlistcode,recombine(term_termlist(leftfromslash(n)),term_termlist(rightfromslash(n))),x,t))))'
 )
 
 subst_termlist=recursive_function(config,
@@ -45,7 +45,7 @@ subst_termlist=recursive_function(config,
 subst_term=basic_function(config,
  name='subst_term',
  desc='n has the form term1 / term2 and term2 is a substitution of t for x in term1',
- define='lambda n,x,t: AND3(isterm(leftfromslash(n)),isterm(rightfromslash(n)),OR3(AND(NOT(isfreeinterm(leftfromslash(n),x)),equal(leftfromslash(n),rightfromslash(n))),AND(equal(leftfromslash(n),x),equal(rightfromslash(n),t)),AND(equal(term_namelc(leftfromslash(n)),term_namelc(rightfromslash(n))),subst_termlist(recombine(term_termlist(leftfromslash(n)),term_termlist(rightfromslash(n))),x,t))))'
+ define='lambda n,x,t: AND5(isnamelc(x),isterm(t),isterm(leftfromslash(n)),isterm(rightfromslash(n)),OR3(AND(NOT(isfreeinterm(leftfromslash(n),x)),equal(leftfromslash(n),rightfromslash(n))),AND(equal(leftfromslash(n),x),equal(rightfromslash(n),t)),AND(equal(term_namelc(leftfromslash(n)),term_namelc(rightfromslash(n))),subst_termlist(recombine(term_termlist(leftfromslash(n)),term_termlist(rightfromslash(n))),x,t))))'
 )
 
 subst_proposition=basic_function(config,
