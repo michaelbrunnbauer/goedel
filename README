@@ -147,9 +147,9 @@ There are four types of functions (see functions.py):
 -"Recursive functions" returning 0 or 1 defined by the value for 0 and the 
  value for some number using values for smaller numbers. These are defined 
  using a primitive recursive function h(x) so that f(x) <-> bit x of h(x) 
- is set. In other words: h(x) codes all results of f(x) from 0-x. Actual 
- computation will use direct recursion because computing h(x) is not 
- feasible.
+ is set. In other words: h(x) codes all results of f(x) from 0-x using 
+ powers of two. Actual computation uses direct recursion because computing
+ h(x) is not feasible.
 
 All definitions use powers to 2 to code and extract information instead of
 prime numbers.
