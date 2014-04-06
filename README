@@ -145,7 +145,7 @@ There are four types of functions (see functions.py):
  primitive recursive functions.
 
 -"Recursive functions" returning 0 or 1 defined by the value for 0 and the 
- value for some number using values for smaller numbers. These are defined 
+ value for some number based on values for smaller numbers. These are defined 
  using a primitive recursive function h(x) so that f(x) = bit x of h(x).
  In other words: h(x) codes all results of f(x) from 0-x using powers of two.
  Actual computation uses unrestricted recursion because computing h(x) is 
