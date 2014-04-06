@@ -1,3 +1,4 @@
-P(x);P(x);
-Q(y);Q(y);
-P(x);Q(y);(P(x)&Q(y));
+# spaces and lines starting with # will be removed before validation
+P(x); P(x);
+Q(y); Q(y);
+P(x); Q(y); (P(x)&Q(y));

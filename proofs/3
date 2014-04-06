@@ -1,4 +1,4 @@
-(P(x)&Q(x));(P(x)&Q(x));
-(P(x)&Q(x));P(x);
-(P(x)&Q(x));Q(x);
-(P(x)&Q(x));(Q(x)&P(x));
+(P(x) & Q(x)); (P(x) & Q(x));
+(P(x) & Q(x)); P(x);
+(P(x) & Q(x)); Q(x);
+(P(x) & Q(x)); (Q(x) & P(x));

@@ -1,4 +1,4 @@
-!x:(P(x)&Q(x));!x:(P(x)&Q(x));
-!x:(P(x)&Q(x));(P(x)&Q(x));
-!x:(P(x)&Q(x));P(x);
-!x:(P(x)&Q(x));!x:P(x);
+!x:(P(x) & Q(x)); !x:(P(x) & Q(x));
+!x:(P(x) & Q(x)); (P(x) & Q(x));
+!x:(P(x) & Q(x)); P(x);
+!x:(P(x) & Q(x)); !x:P(x);

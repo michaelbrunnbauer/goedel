@@ -1,5 +1,5 @@
-!x:!y:P(x,y);!x:!y:P(x,y);
-!x:!y:P(x,y);!y:P(x,y);
-!x:!y:P(x,y);P(x,y);
-!x:!y:P(x,y);P(x,x);
-!x:!y:P(x,y);!x:P(x,x);
+!x:!y:P(x,y); !x:!y:P(x,y);
+!x:!y:P(x,y); !y:P(x,y);
+!x:!y:P(x,y); P(x,y);
+!x:!y:P(x,y); P(x,x);
+!x:!y:P(x,y); !x:P(x,x);
