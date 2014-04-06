@@ -153,6 +153,7 @@ prime numbers.
 
 Use printdefinitions.py to print all definitions.
 
-Use checkproof.py <file> to check a proof in ASCII-file <file> for vadility.
+Use checkproof.py <file> to check a proof in ASCII-file <file> for vadility
+using computation on its Gödel number.
 
 Use testsuite.py to run a testsuite.
