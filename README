@@ -148,8 +148,8 @@ There are four types of functions (see functions.py):
  value for some number using values for smaller numbers. These are defined 
  using a primitive recursive function h(x) so that f(x) = bit x of h(x).
  In other words: h(x) codes all results of f(x) from 0-x using powers of two.
- Actual computation uses direct recursion because computing h(x) is not 
- feasible.
+ Actual computation uses unrestricted recursion because computing h(x) is 
+ not feasible in practice.
 
 All definitions use powers to 2 to code and extract information instead of
 prime numbers.
