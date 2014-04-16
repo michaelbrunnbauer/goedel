@@ -136,7 +136,7 @@ The primitive recursive definitions use the symbols n0 (the number 0) and
 successor function succ(). They start with the definition of n1-n256 
 (the numbers 1-256).
 
-There are four types of functions (see functions.py):
+There are five types of functions (see functions.py):
 
 -Basic functions defined by an expression
 
