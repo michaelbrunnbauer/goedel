@@ -9,19 +9,29 @@ if sys.getrecursionlimit() < 2500:
 from functions_proof import *
 from goedelize import *
 
-def checkproof(s):
+def checkproof(filename):
+    f=open(filename,"r")
+    s=f.read()
+    f.close()
+
     s=s.replace(' ','')
-    if isvalidproof(gn(s)) == 1:
-        return
     s=s.strip()
     s=s.split('\n')
-    for x in range(1,len(s)+1):
-        s1='\n'.join(s[:x])
-        s1+='\n'
-        assert isvalidproof(gn(s1)) == 1,'\n'+s1
+    s1=[]
+    for line in s:
+        if not line.startswith('#'):
+            s1.append(line)
+    s=s1
+    s1='\n'.join(s)
+    s1+='\n'
+    assert isvalidproof(gn(s1)) == 1
 
 def testsuite():
     config.caching=True
+    assert goedelstring(0)==''
+    s='123'
+    assert goedelstring(gn(s))==s
+
     assert ac(1) == 0
     assert plus(11,5) == 16
     assert mul(11,5) == 55
@@ -72,6 +82,14 @@ def testsuite():
     assert bitset(3,0) == 1
     assert bitset(3,1) == 1
     assert bitset(3,2) == 0
+
+    assert bitslice(0,0,0) == 0
+    assert bitslice(0,0,10) == 0
+    assert bitslice(1,0,0) == 1
+    assert bitslice(1,0,10) == 1
+    assert bitslice(423895,0,2) == 7
+    assert bitslice(423895,2,8) == 117
+    assert bitslice(423895,0,80) == 423895
 
     assert isnamelc(0) == 0
     assert isnamelc(gn('c')) == 1
@@ -152,6 +170,10 @@ def testsuite():
     assert isformula(gn('(P(x)&(P(y)&P(z)))')) == 1
     assert isconjunction(0) == 0
 
+    assert number(0) == gn('n0')
+    assert number(1) == gn('succ(n0)')
+    assert number(2) == gn('succ(succ(n0))')
+
     x=gn('x')
     assert isfreeintermlist(0,x) == 0
     assert isfreeintermlist(0,0) == 0 
@@ -214,39 +236,36 @@ def testsuite():
     assert isfreeinformula(f,gn('z')) == 1
     assert isfreeinformula(f,gn('x')) == 0
 
-    f=gn('x/z(a)')
+    f=gn('x')
     x=gn('x')
     t=gn('z(a)')
-    assert subst_termlist(f,x,t) == 1
-    f=gn('b,y/b,y')
-    assert subst_termlist(f,x,t) == 1
-    f=gn('y,g(a,x)/y,g(a,z(a))')
-    assert subst_termlist(f,x,t) == 1
+    assert subst_termlist(f,x,t) == gn('z(a)')
+    f=gn('b,y')
+    assert subst_termlist(f,x,t) == gn('b,y')
+    f=gn('y,g(a,x)')
+    assert subst_termlist(f,x,t) == gn('y,g(a,z(a))')
 
-    f=gn('P(x)/P(z(a))')
-    assert subst_proposition(f,x,t) == 1
-    f=gn('P(b,y)/P(b,y)')
-    assert subst_proposition(f,x,t) == 1
-    f=gn('P(b,y)/F(b,y)')
-    assert subst_proposition(f,x,t) == 0
+    f=gn('P(x)')
+    assert subst_proposition(f,x,t) == gn('P(z(a))')
+    f=gn('P(b,y)')
+    assert subst_proposition(f,x,t) == f
 
-    f=gn('a=b/c=f(d)')
-    assert subst_equation(f,x,t) == 0
-    f=gn('x=b/z(a)=b')
-    assert subst_equation(f,x,t) == 1
+    f=gn('a=b')
+    assert subst_equation(f,x,t) == f
+    f=gn('x=b')
+    assert subst_equation(f,x,t) == gn('z(a)=b')
 
-    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))/(!x:(Q(x)&~R(x,y))&~!y:S(y,z))')
-    assert subst_formula(f,x,t) == 1
-    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))/(!x:(Q(z(a))&~R(z(a),y))&~!y:S(y,z))')
-    assert subst_formula(f,x,t) == 0
-    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))/(!x:(Q(x)&~R(x,z(a)))&~!y:S(y,z))')
+    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))')
+    assert subst_formula(f,x,t) == f
     x=gn('y')
-    assert subst_formula(f,x,t) == 1
-    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))/(!x:(Q(x)&~R(x,z(a)))&~!y:S(z(a),z))')
-    assert subst_formula(f,x,t) == 0
+    assert subst_formula(f,x,t) == gn('(!x:(Q(x)&~R(x,z(a)))&~!y:S(y,z))')
     x=gn('z')
-    f=gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z))/(!x:(Q(x)&~R(x,y))&~!y:S(y,z(a)))')
-    assert subst_formula(f,x,t) == 1
+    assert subst_formula(f,x,t) == gn('(!x:(Q(x)&~R(x,y))&~!y:S(y,z(a)))')
+
+    x=gn('!z:P(x,y,x)')
+    y=gn('x')
+    z=gn('f(a)')
+    assert subst_formula(x,y,z)==gn('!z:P(f(a),y,f(a))')
 
     s=gn('This is a test')
     assert find_pos(ord(' '),s,0) == 5
@@ -303,8 +322,14 @@ def testsuite():
     f=gn('P(x);T(x);\n')
     assert isvalidproof(f) == 0
 
-print "basic tests"
+    checkproof('proofs/1')
+    checkproof('proofs/2')
+    checkproof('proofs/3')
+    checkproof('proofs/4')
+    checkproof('proofs/5')
+    checkproof('proofs/6')
+    checkproof('proofs/7')
+    checkproof('proofs/8')
+
 testsuite()
-import os
-if not os.system('./checkproof.py proofs/*'):
-    print "All tests OK!"
+print "All tests OK!"

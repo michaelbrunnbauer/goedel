@@ -132,8 +132,9 @@ rule allows to permutate to get the required order for rule 5:
 
 You can find example proofs in the subdirectory proofs.
 
-The primitive recursive definitions use the symbols 0, the successor function
-succ(), the identity = and the numbers 1-255.
+The primitive recursive definitions use the symbols n0 (the number 0) and
+successor function succ(). They start with the definition of n1-n256 
+(the numbers 1-256).
 
 There are four types of functions (see functions.py):
 
@@ -146,12 +147,19 @@ There are four types of functions (see functions.py):
  which a function does not return 0 - otherwise 0. These are defined using 
  primitive recursive functions.
 
--"Recursive functions" returning 0 or 1 defined by the value for 0 and the 
+-"Recursive relations" returning 0 or 1 defined by the value for 0 and the 
  value for some number based on values for smaller numbers. These are defined 
  using a primitive recursive function h(x) so that f(x) = bit x of h(x).
  In other words: h(x) codes all results of f(x) from 0-x using powers of two.
  Actual computation uses unrestricted recursion because computing h(x) is 
  not feasible in practice.
+
+-"Recursive functions" returning arbitrary values defined by the value for 0
+ and the value for some number based on values for smaller numbers. These are 
+ defined analogous to "Recursive relations" using a primitive recursive 
+ function h(x) so that f(x) = bit a-b of h(x). a and b are determined with a
+ primitive recursive function bitstart so that a = bitstart(x) and b = 
+ bitstart(x+1)-1.
 
 All definitions use powers to 2 to code and extract information instead of
 prime numbers.

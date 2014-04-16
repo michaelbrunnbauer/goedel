@@ -6,31 +6,31 @@ config.globals=globals()
 istautology=basic_function(config,
  name='istautology',
  desc='x is a tautological sequence',
- define='lambda x: OR(isimplies_itself(x),istautologicalequation(x))'
+ define='lambda x: or_f(isimplies_itself(x),istautologicalequation(x))'
 )
 
 isimplicationfromonesequence=basic_function(config,
  name='isimplicationfromonesequence',
  desc='sequence y is an implication of sequence x',
- define='lambda x,y: OR7(ispermutation(x,y),isdeletionofconjunction1(x,y),isdeletionofconjunction2(x,y),isremovalofgeneralization(x,y),isintroductionofgeneralization(x,y),issubstitution(x,y),issubstitutionwithidentity(x,y))'
+ define='lambda x,y: or_f7(ispermutation(x,y),isdeletionofconjunction1(x,y),isdeletionofconjunction2(x,y),isremovalofgeneralization(x,y),isintroductionofgeneralization(x,y),issubstitution(x,y),issubstitutionwithidentity(x,y))'
 )
 
 isimplicationfromtwosequences=basic_function(config,
  name='isimplicationfromtwosequences',
  desc='sequence z is an implication of sequence x and y',
- define='lambda x,y,z: OR3(isintroductionofconjunction(x,y,z),isexhaustion(x,y,z),isquodlibet(x,y,z))'
+ define='lambda x,y,z: or_f3(isintroductionofconjunction(x,y,z),isexhaustion(x,y,z),isquodlibet(x,y,z))'
 )
 
 proofitem=basic_function(config,
  name='proofitem',
  desc='nth statement in sequence of sequences x delimited by \\n',
- define='lambda n,x: slice(succ(find(acfull(n),10,x)),acfull(find(n,10,x)),x)'
+ define='lambda n,x: slice(succ(find(acfull(n),n10,x)),acfull(find(n,n10,x)),x)'
 )
 
 prooflength=basic_function(config,
  name='prooflength',
  desc='length of sequence of sequences n',
- define='lambda n: occur(10,n)'
+ define='lambda n: occur(n10,n)'
 )
 
 proof_end=basic_function(config,
@@ -42,15 +42,15 @@ proof_end=basic_function(config,
 proof_start=basic_function(config,
  name='proof_start',
  desc='returns all but last item of a sequence of sequences, 0 if sequence of sequences has length 1',
- define='lambda n: slice(1,find(acfull(prooflength(n)),10,n),n)'
+ define='lambda n: slice(n1,find(acfull(prooflength(n)),n10,n),n)'
 )
 
 # every well formed sequence of sequences must end with '\n' and must be nonempty
-isproof=recursive_function(config,
+isproof=recursive_relation(config,
  name='isproof',
  desc='n is a valid nonempty sequence of sequences ending with \\n',
- zero='lambda: 0',
- relation='lambda n,y: AND3(equal(item(length(n),n),10),issequence(proof_end(n)),OR(zero(proof_start(n)),recursive_isproof(y,proof_start(n))))'
+ zero='lambda: n0',
+ relation='lambda n,y: and_f3(equal(item(length(n),n),n10),issequence(proof_end(n)),or_f(zero(proof_start(n)),recursive_isproof(y,proof_start(n))))'
 )
 
 issimplyimplicatedbyone1=argmin_function(config,
@@ -86,9 +86,15 @@ issimplyimplicatedbytwo=basic_function(config,
  define='lambda x,y: notzero(issimplyimplicatedbytwo2(x,y))'
 )
 
-isvalidproof=recursive_function(config,
+isvalidproof=recursive_relation(config,
  name='isvalidproof',
  desc='x is a valid proof (every sequence follows directly from zero, one or two preceding sequences)',
- zero='lambda: 0',
- relation='lambda x,y: AND3(isproof(x),OR3(istautology(proof_end(x)),issimplyimplicatedbyone(proof_start(x),proof_end(x)),issimplyimplicatedbytwo(proof_start(x),proof_end(x))),OR(zero(proof_start(x)),recursive_isvalidproof(y,proof_start(x))))'
+ zero='lambda: n0',
+ relation='lambda x,y: and_f3(isproof(x),or_f3(istautology(proof_end(x)),issimplyimplicatedbyone(proof_start(x),proof_end(x)),issimplyimplicatedbytwo(proof_start(x),proof_end(x))),or_f(zero(proof_start(x)),recursive_isvalidproof(y,proof_start(x))))'
+)
+
+isvalidprooffor=basic_function(config,
+ name='isvalidprooffor',
+ desc='x is a valid proof for y',
+ define='lambda x,y: and_f3(isvalidproof(x),isformula(y),equal(proof_end(x),concat(y,n59)))'
 )

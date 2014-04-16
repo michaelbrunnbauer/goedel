@@ -48,7 +48,7 @@ def prettyprint1(parsedterm,indent,forcenl):
         return parsedterm[0]
     tlist=parsedterm[1]
     rueck=parsedterm[0]+'('
-    nl=parsedterm[0] in ('AND','OR','ifzero','cond') or forcenl
+    nl=parsedterm[0] in ('and_f','or_f','ifzero','cond') or forcenl
     indentnew=indent+len(parsedterm[0])+1
     if tlist[0][1] is None:
         rueck+=tlist[0][0]
@@ -62,9 +62,10 @@ def prettyprint1(parsedterm,indent,forcenl):
         rueck+='\n'+' '*indentnew
     for term in tlist:
         termpp=prettyprint1(term,indentnew,0)+','
-        if '\n' in termpp or len(termpp) + indentnew > 79:
-            forcenl_new=forcenl-1 if forcenl else forcenl
-            termpp=prettyprint1(term,indentnew,forcenl_new)+','
+        if forcenl:
+            if '\n' in termpp or len(termpp) + indentnew > 79:
+                forcenl_new=forcenl-1
+                termpp=prettyprint1(term,indentnew,forcenl_new)+','
         rueck+=termpp
         if nl:
             rueck+='\n'+' '*indentnew

@@ -19,8 +19,8 @@ class configuration(object):
 
         self.functions=[]
         self.symbols=set(['succ'])
-        for x in range(256):
-            self.symbols.add(str(x))
+        for x in range(257):
+            self.symbols.add('n'+str(x))
 
 class basefunction(object):
     def __init__(self,*args,**kwargs):
@@ -57,11 +57,10 @@ class basefunction(object):
         if self.asserts is not None:
             assert self.asserts_f(*args),(self.name,args)
 
-        if self.fast is not None:
-            if self.config.fastfunctions==True or self.name in self.config.fastfunctions:
-                return self.fast_f(*args)
-
-        result=self.call(*args)
+        if self.fast is not None and (self.config.fastfunctions==True or self.name in self.config.fastfunctions):
+            return self.fast_f(*args)
+        else:
+            result=self.call(*args)
 
         if self.config.caching:
             self.cache_put(args,result)
@@ -181,11 +180,14 @@ class basic_function(basefunction):
     def call(self,*args):
         return self.define_f(*args)
 
-    def definition(self):
+    def definition(self,formal=False):
         rueck=''
         params,source=self.lambdasource(self.define)
+        if formal:
+            for param in params:
+                rueck+='!'+param+':'
         params=','.join(params)
-        rueck+=self.name+'('+params+') = '+source
+        rueck+=self.name+'('+params+')='+source
         return rueck
 
 # function f defined by primitive recursion
@@ -220,7 +222,7 @@ class primitive_recursive_function(basefunction):
             args=(n-1,) + args[1:]
             return self.next_f(*args)
 
-    def definition(self):
+    def definition(self,formal=False):
         rueck=''
         zeroparams,zerosource=self.lambdasource(self.zero)
         nextparams,nextsource=self.lambdasource(self.next)
@@ -229,8 +231,14 @@ class primitive_recursive_function(basefunction):
         restparams=','.join(nextparams[1:])
         if restparams:
             restparams=','+restparams
-        rueck+=self.name+'(0'+restparams+') = '+zerosource+'\n'
-        rueck+=self.name+'('+firstparam+'+1'+restparams+') = '+nextsource
+        if formal:
+            for param in zeroparams:
+                rueck+='!'+param+':'
+        rueck+=self.name+'(n0'+restparams+')='+zerosource+'\n'
+        if formal:
+            for param in nextparams:
+                rueck+='!'+param+':'
+        rueck+=self.name+'(succ('+firstparam+')'+restparams+')='+nextsource
         return rueck
 
 # returns the smallest x <= max(...) for which relation(x,...) == 1
@@ -263,7 +271,7 @@ class argmin_function(basefunction):
             x+=1
         return 0
 
-    def definition(self):
+    def definition(self,formal=False):
         rueck=''
 
         params,source=self.lambdasource(self.relation)
@@ -273,40 +281,33 @@ class argmin_function(basefunction):
         if restparams:
             restparams=','+restparams   
 
-        rueck+='relation_'+self.name+'('+firstparam+restparams+') = '+source+'\n'
-        rueck+='argmin_'+self.name+'(0'+restparams+') = 0\n'
-        rueck+='argmin_'+self.name+'('+firstparam+'+1'+restparams+') = '
-        rueck+='ifzero(argmin_'+self.name+'('+firstparam+restparams+'),cond(relation_'+self.name+'(succ('+firstparam+')'+restparams+'),succ('+firstparam+'),0))\n'
+        if formal:
+            for param in params:
+                rueck+='!'+param+':'
+        rueck+='relation_'+self.name+'('+firstparam+restparams+')='+source+'\n'
+        if formal:
+            for param in params[1:]:
+                rueck+='!'+param+':'
+        rueck+='argmin_'+self.name+'(n0'+restparams+')=n0\n'
+        if formal:
+            for param in params:
+                rueck+='!'+param+':'
+        rueck+='argmin_'+self.name+'(succ('+firstparam+')'+restparams+')='
+        rueck+='ifzero(argmin_'+self.name+'('+firstparam+restparams+'),cond(relation_'+self.name+'(succ('+firstparam+')'+restparams+'),succ('+firstparam+'),n0))\n'
         maxparams,maxsource=self.lambdasource(self.max)
         maxparams=','.join(maxparams)
         if maxparams:
             assert ','+maxparams==restparams
         else:
             assert maxparams==restparams
-        rueck+=self.name+'('+maxparams+') = argmin_'+self.name+'('+maxsource+restparams+')'
+        if formal:
+            for param in params[1:]:
+                rueck+='!'+param+':'
+        rueck+=self.name+'('+maxparams+')=argmin_'+self.name+'('+maxsource+restparams+')'
         return rueck
 
-# Assume you want to define a primitive recursive relation r(x) like this:
-# r(0) = 1 <-> ...
-# r(x) = 1 <-> ... or ( r(a) and r(b) and ... ) where a,b < x
-# This cannot be done with the primitive recursion scheme where
-# r(x+1,...) is defined only in terms of r(x,...) - not some r(y,...) (y < x).
-#
-# This can be solved by defining a primitive recursive h(x) so that 
-# r(x) <-> bit x of h(x) is set:
-# h(0) = 1 <-> ...
-# h(x+1) = h(x) + f(x+1,h(x))*(2**(x+1))
-# recursive_r(y,x) = bitset(y,x)
-# f(x,y) = 1 <-> ... or ( recursive_r(y,a) and recursive_r(y,b) and ... )
-# where a,b < x
-#
-# This class will define h(x,...), and r(x,...) = bitset(h(x,...),x)
-# You just have to specify h(0,...) and f(x,...,y) as functions with result 0
-# or 1 and you have to define recursive_r(y,a,...) as bitset(y,a).
-# You can use calls to recursive_r(y,a,...) in the definition of
-# f(x,...,y). The computation will not use h(x,...) but replace calls to
-# recursive_r(y,a,...) with calls to r(a,...) to stay feasible.
-class recursive_function(basefunction):
+# see explanation contained in / printed by printdefinitions
+class recursive_relation(basefunction):
 
     def init(self,config,name,desc,zero,relation,fast=None,asserts=None):
         assert zero and next
@@ -336,29 +337,156 @@ class recursive_function(basefunction):
             assert result in (0,1),result
             return result
 
-    def definition(self):
-        zeroparams,zerosource=self.lambdasource(self.zero)
-        relparams,relsource=self.lambdasource(self.relation)
-        assert len(relparams) == len(zeroparams)+2
-        assert relparams[1:-1] == zeroparams
+    def definition(self,formal=False):
+        zeroparams1,zerosource=self.lambdasource(self.zero)
+        relparams1,relsource=self.lambdasource(self.relation)
+        assert len(relparams1) == len(zeroparams1)+2
+        assert relparams1[1:-1] == zeroparams1
 
-        firstparam=relparams[0]
-        lastparam=relparams[-1]
-        zeroparams=self.plist(zeroparams)
+        firstparam=relparams1[0]
+        lastparam=relparams1[-1]
+        zeroparams=self.plist(zeroparams1)
         if zeroparams:
             zeroparams=','+zeroparams
-        myparams=self.plist(relparams[:-1])
-        relparams=self.plist(relparams)
-        rueck='f_'+self.name+'('+relparams+') = '+relsource+'\n'
-        rueck+='h_'+self.name+'(0'+zeroparams+') = '+zerosource+'\n'
-        rueck+='h_'+self.name+'('+firstparam+'+1'+zeroparams+') = plus(h_'+self.name+'('+myparams+'),mul(f_'+self.name+'(succ('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(2,succ('+firstparam+'))))\n'
-        rueck+=self.name+'('+myparams+') = bitset(h_'+self.name+'('+myparams+'),'+firstparam+')'
+        myparams1=relparams1[:-1]
+        myparams=self.plist(myparams1)
+        relparams=self.plist(relparams1)
+        rueck=''
+        if formal:
+            for param in relparams1:
+                rueck+='!'+param+':'
+        rueck+='f_'+self.name+'('+relparams+')='+relsource+'\n'
+        if formal:
+            for param in zeroparams1:
+                rueck+='!'+param+':'
+        rueck+='h_'+self.name+'(n0'+zeroparams+')='+zerosource+'\n'
+        if formal:
+            for param in myparams1:
+                rueck+='!'+param+':'
+        rueck+='h_'+self.name+'(succ('+firstparam+')'+zeroparams+')=plus(h_'+self.name+'('+myparams+'),mul(f_'+self.name+'(succ('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,succ('+firstparam+'))))\n'
+        if formal:
+            for param in myparams1:
+                rueck+='!'+param+':'
+        rueck+=self.name+'('+myparams+')=bitset(h_'+self.name+'('+myparams+'),'+firstparam+')'
         return rueck
 
     # definition of recursive_r(y,a,...). separate because may be printed
     # earlier
-    def definition1(self):
+    def definition1(self,formal=True):
         relparams,relsource=self.lambdasource(self.relation)
         params=[relparams[-1]]+relparams[:-1]
-        rueck='recursive_'+self.name+'('+self.plist(params)+') = bitset('+params[0]+','+params[1]+')'
+        rueck=''
+        if formal:
+            for param in params:
+                rueck+='!'+param+':'
+        rueck+='recursive_'+self.name+'('+self.plist(params)+')=bitset('+params[0]+','+params[1]+')'
+        return rueck
+
+# see explanation contained in / printed by printdefinitions
+class recursive_function(basefunction):
+
+    def init(self,config,name,desc,resultlen,zero,function,fast=None,asserts=None):
+        assert zero and next
+        self.config=config
+        self.name=name
+        self.desc=desc
+
+        self.resultlen=resultlen
+        self.resultlen_f=self.getf(resultlen)
+        self.name_bitstart='bitstart_'+self.name
+        params,source=self.lambdasource(resultlen)
+        source='lambda '+','.join(params)+': plus('+source+','+self.name_bitstart+'('+','.join(params)+'))'
+
+        if len(params)==1:
+            source0='lambda: n0'
+        else:
+            source0='lambda '+','.join(params[1:])+': n0'
+        self.bitstart_f=primitive_recursive_function(self.config,
+         name=self.name_bitstart,
+         desc='',
+         zero=source0,
+         next=source
+        )
+        popv=self.config.functions.pop(-1)
+        assert popv.name == self.name_bitstart,popv
+
+        self.zero=zero
+        self.zero_f=self.getf(zero)
+        self.function=function
+        self.function_f=self.getf(function)
+        self.fast=fast
+        self.asserts=asserts
+        self.checksymbols(zero)
+        self.checksymbols(function)
+        self.addsymbol(self.name)
+
+    def call(self,*args):
+        n=args[0]
+        if n==0:
+            bits_this=self.resultlen_f(*args)
+            args=args[1:]
+            result=self.zero_f(*args)
+            assert result.bit_length() <= bits_this,(result.bit_length(),bits_this)
+            return result
+        else:
+            bits_this=self.resultlen_f(*args)
+            args+=(None,)
+            result=self.function_f(*args)
+            assert result.bit_length() <= bits_this,(result.bit_length(),bits_this)
+            return result
+
+    def definition(self,formal=False):
+        zeroparams1,zerosource=self.lambdasource(self.zero)
+        funcparams1,funcsource=self.lambdasource(self.function)
+        assert len(funcparams1) == len(zeroparams1)+2
+        assert funcparams1[1:-1] == zeroparams1
+
+        firstparam=funcparams1[0]
+        lastparam=funcparams1[-1]
+        zeroparams=self.plist(zeroparams1)
+        if zeroparams:
+            zeroparams=','+zeroparams
+        myparams1=funcparams1[:-1]
+        myparams=self.plist(myparams1)
+        funcparams=self.plist(funcparams1)
+
+        rparams=[funcparams1[-1]]+funcparams1[:-1]
+        rparams1=rparams[2:]
+        rparams1=','.join(rparams1)
+        if rparams1:
+            rparams1=','+rparams1
+
+        rueck=''
+        if formal:
+            for param in funcparams1:
+                rueck+='!'+param+':'
+        rueck+='f_'+self.name+'('+funcparams+')='+funcsource+'\n'
+        if formal:
+            for param in zeroparams1:
+                rueck+='!'+param+':'
+        rueck+='h_'+self.name+'(n0'+zeroparams+')='+zerosource+'\n'
+        if formal:
+            for param in myparams1:
+                rueck+='!'+param+':'
+        rueck+='h_'+self.name+'(succ('+firstparam+')'+zeroparams+')=plus(h_'+self.name+'('+myparams+'),mul(f_'+self.name+'(succ('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,'+self.name_bitstart+'(succ('+rparams[1]+')'+rparams1+'))))\n'
+        if formal:
+            for param in myparams1:
+                rueck+='!'+param+':'
+        rueck+=self.name+'('+myparams+')=recursive_'+self.name+'(h_'+self.name+'('+myparams+'),'+myparams+')'
+        return rueck
+
+
+    def definition1(self,formal=False):
+        funcparams1,funcsource=self.lambdasource(self.function)
+        rparams=[funcparams1[-1]]+funcparams1[:-1]
+        rparams1=rparams[2:]
+        rparams1=','.join(rparams1)
+        if rparams1:
+            rparams1=','+rparams1
+
+        rueck=self.bitstart_f.definition(formal=formal)+'\n'
+        if formal:
+            for param in rparams:
+                rueck+='!'+param+':'
+        rueck+='recursive_'+self.name+'('+self.plist(rparams)+')=bitslice('+rparams[0]+','+self.name_bitstart+'('+self.plist(rparams[1:])+'),acfull('+self.name_bitstart+'(succ('+rparams[1]+')'+rparams1+')))'
         return rueck
