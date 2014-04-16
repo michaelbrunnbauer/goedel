@@ -1,46 +1,4 @@
-
-def termlist(s):
-    if not s:
-        return []
-    result=parseterm(s)
-    if result is not None:
-        return [result]
-    s=s.split(',')
-    for i in range(1,len(s)):
-        a=','.join(s[:i])
-        b=','.join(s[i:])
-        result1=parseterm(a)
-        if result1 is not None:
-            result2=termlist(b)
-            if result2:
-                return [result1]+result2
-    return []
-
-def isvariable(s):
-    if not s:
-        return False
-    for c in s:
-         if not c.isalnum() and not c=='_':
-             return False
-    return True
-
-def parseterm(s):
-    if not s:
-        return None
-    if isvariable(s):
-        return (s,None)
-    if not s.endswith(')'):
-        return None
-    pos=s.find('(')
-    if pos==-1:
-        return None
-    part1=s[:pos]
-    if not isvariable(part1):
-        return None
-    part2=termlist(s[pos+1:-1])
-    if part2:
-        return (part1,part2)
-    return None
+from parseterm import parseterm
 
 # this got much too involved
 def prettyprint1(parsedterm,indent,forcenl):

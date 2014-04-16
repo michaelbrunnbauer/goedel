@@ -11,6 +11,7 @@ from goedelize import *
 
 config.caching=True
 config.fastfunctions=True
+config.optimize=True
 
 def checkproof(s):
     s=s.replace(' ','')

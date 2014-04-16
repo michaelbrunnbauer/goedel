@@ -78,6 +78,7 @@ def testsuite():
 
     # from now on, do everything fast that can be done fast
     config.fastfunctions=True
+    config.optimize=True
 
     assert bitset(3,0) == 1
     assert bitset(3,1) == 1
@@ -266,6 +267,13 @@ def testsuite():
     y=gn('x')
     z=gn('f(a)')
     assert subst_formula(x,y,z)==gn('!z:P(f(a),y,f(a))')
+
+    x=gn('x')
+    t=gn('f(y)')
+    f=gn('!y:x=y')
+    assert subst_formula(f,x,t) == 0
+    t=gn('f(a)')
+    assert subst_formula(f,x,t) == gn('!y:f(a)=y')
 
     s=gn('This is a test')
     assert find_pos(ord(' '),s,0) == 5

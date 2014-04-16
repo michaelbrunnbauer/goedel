@@ -1,10 +1,9 @@
 # classes to generate primitive recursive functions
 
-# todo:
-# work with getpartof...()
+import parseterm
 
 class configuration(object):
-    __slots__ = 'fastfunctions','debugfunctions','caching','symbols','functions','globals'
+    __slots__ = 'fastfunctions','debugfunctions','caching','symbols','functions','globals','optimize'
 
     def __init__(self,globals):
         self.globals=globals
@@ -16,6 +15,8 @@ class configuration(object):
         self.debugfunctions=set()
         # default is no caching
         self.caching=False
+        # default is no optimization for and_f/or_f
+        self.optimize=False
 
         self.functions=[]
         self.symbols=set(['succ'])
@@ -29,11 +30,11 @@ class basefunction(object):
         self._cache_size=100000
         self.init(*args,**kwargs)
         if self.fast is not None:
-            self.fast_f=self.getf(self.fast)
+            self.fast_f=self.getf(self.fast,reformat=False)
         else:
             self.fast_f=None
         if self.asserts is not None:
-            self.asserts_f=self.getf(self.asserts)
+            self.asserts_f=self.getf(self.asserts,reformat=False)
         else:
             self.asserts_f=None
         self.config.functions.append(self)
@@ -69,17 +70,13 @@ class basefunction(object):
 
     # get eval of source of lambda function with
     # recursive_<name>(<firstparameter>,...) replaced by <name>(...)
-    def getf(self,s):
-        while True:
-            pos=s.find('recursive_',0)
-            if pos==-1:
-                break
-            pos1=s.find('(',pos)
-            assert pos1>pos
-            pos2=s.find(',',pos)
-            assert pos2>pos1
-            fname=s[pos+10:pos1]
-            s=s[:pos]+fname+'('+s[pos2+1:]
+    def getf(self,s,reformat=True,optimize=False):
+        if reformat:
+            params,source=self.lambdasource(s)
+            parsedterm=parseterm.parseterm(source)
+            assert parsedterm is not None,source
+            s=parseterm.reformat(parsedterm,optimizeandor=optimize)
+            s='lambda '+','.join(params)+': '+s
         return eval(s,self.config.globals)
 
     # get parameters and definition from source of lambda function
@@ -172,13 +169,17 @@ class basic_function(basefunction):
         self.desc=desc
         self.define=define
         self.define_f=self.getf(define)
+        self.define_f_opt=self.getf(define,optimize=True)
         self.fast=fast
         self.asserts=asserts
         self.checksymbols(define)
         self.addsymbol(self.name)
 
     def call(self,*args):
-        return self.define_f(*args)
+        if self.config.optimize:
+            return self.define_f_opt(*args)
+        else:
+            return self.define_f(*args)
 
     def definition(self,formal=False):
         rueck=''
@@ -203,8 +204,10 @@ class primitive_recursive_function(basefunction):
         self.desc=desc
         self.zero=zero
         self.zero_f=self.getf(zero)
+        self.zero_f_opt=self.getf(zero,optimize=True)
         self.next=next
         self.next_f=self.getf(next)
+        self.next_f_opt=self.getf(next,optimize=True)
         self.fast=fast
         self.asserts=asserts
         self.checksymbols(zero)
@@ -215,12 +218,18 @@ class primitive_recursive_function(basefunction):
         n=args[0]
         if n==0:
             args=args[1:]
-            return self.zero_f(*args)
+            if self.config.optimize:
+                return self.zero_f_opt(*args)
+            else:
+                return self.zero_f(*args)
         else:
             # we could compute n-1 with succ(), == and forward counting
             # recursion here but this seems pointless
             args=(n-1,) + args[1:]
-            return self.next_f(*args)
+            if self.config.optimize:
+                return self.next_f_opt(*args)
+            else:
+                return self.next_f(*args)
 
     def definition(self,formal=False):
         rueck=''
@@ -251,8 +260,10 @@ class argmin_function(basefunction):
         self.desc=desc
         self.max=max
         self.max_f=self.getf(max)
+        self.max_f_opt=self.getf(max,optimize=True)
         self.relation=relation
         self.relation_f=self.getf(relation)
+        self.relation_f_opt=self.getf(relation,optimize=True)
         self.fast=fast
         self.asserts=asserts
         self.checksymbols(max)
@@ -260,10 +271,16 @@ class argmin_function(basefunction):
         self.addsymbol(self.name)
 
     def call(self,*args):
-        m=self.max_f(*args)
+        if self.config.optimize:
+            m=self.max_f_opt(*args)
+        else:
+            m=self.max_f(*args)
         x = 0
         while x <= m:
-            result=self.relation_f(x,*args)
+            if self.config.optimize:
+                result=self.relation_f_opt(x,*args)
+            else:
+                result=self.relation_f(x,*args)
             assert type(result)==int
             assert result in (1,0)
             if result:
@@ -316,8 +333,10 @@ class recursive_relation(basefunction):
         self.desc=desc
         self.zero=zero
         self.zero_f=self.getf(zero)
+        self.zero_f_opt=self.getf(zero,optimize=True)
         self.relation=relation
         self.relation_f=self.getf(relation)
+        self.relation_f_opt=self.getf(relation,optimize=True)
         self.fast=fast
         self.asserts=asserts
         self.checksymbols(zero)
@@ -328,12 +347,18 @@ class recursive_relation(basefunction):
         n=args[0]
         if n==0:
             args=args[1:]
-            result=self.zero_f(*args)
+            if self.config.optimize:
+                result=self.zero_f_opt(*args)
+            else:
+                result=self.zero_f(*args)
             assert result in (0,1),result
             return result
         else:
             args+=(None,)
-            result=self.relation_f(*args)
+            if self.config.optimize:
+                result=self.relation_f_opt(*args)
+            else:
+                result=self.relation_f(*args)
             assert result in (0,1),result
             return result
 
@@ -393,6 +418,7 @@ class recursive_function(basefunction):
 
         self.resultlen=resultlen
         self.resultlen_f=self.getf(resultlen)
+        self.resultlen_f_opt=self.getf(resultlen,optimize=True)
         self.name_bitstart='bitstart_'+self.name
         params,source=self.lambdasource(resultlen)
         source='lambda '+','.join(params)+': plus('+source+','+self.name_bitstart+'('+','.join(params)+'))'
@@ -412,8 +438,10 @@ class recursive_function(basefunction):
 
         self.zero=zero
         self.zero_f=self.getf(zero)
+        self.zero_f_opt=self.getf(zero,optimize=True)
         self.function=function
         self.function_f=self.getf(function)
+        self.function_f_opt=self.getf(function,optimize=True)
         self.fast=fast
         self.asserts=asserts
         self.checksymbols(zero)
@@ -423,15 +451,27 @@ class recursive_function(basefunction):
     def call(self,*args):
         n=args[0]
         if n==0:
-            bits_this=self.resultlen_f(*args)
+            if self.config.optimize:
+                bits_this=self.resultlen_f_opt(*args)
+            else:
+                bits_this=self.resultlen_f(*args)
             args=args[1:]
-            result=self.zero_f(*args)
+            if self.config.optimize:
+                result=self.zero_f_opt(*args)
+            else:
+                result=self.zero_f(*args)
             assert result.bit_length() <= bits_this,(result.bit_length(),bits_this)
             return result
         else:
-            bits_this=self.resultlen_f(*args)
+            if self.config.optimize:
+                bits_this=self.resultlen_f_opt(*args)
+            else:
+                bits_this=self.resultlen_f(*args)
             args+=(None,)
-            result=self.function_f(*args)
+            if self.config.optimize:
+                result=self.function_f_opt(*args)
+            else:
+                result=self.function_f(*args)
             assert result.bit_length() <= bits_this,(result.bit_length(),bits_this)
             return result
 

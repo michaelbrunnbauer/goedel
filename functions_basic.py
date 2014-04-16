@@ -88,8 +88,7 @@ mul=primitive_recursive_function(config,
 and_f=basic_function(config,
  name='and_f',
  desc='logical and',
- define='lambda a,b: mul(notzero(a),notzero(b))',
- fast='lambda a,b: 1 if a and b else 0'
+ define='lambda a,b: mul(notzero(a),notzero(b))'
 )
 
 and_f3=basic_function(config,
@@ -143,8 +142,7 @@ and_f10=basic_function(config,
 or_f=basic_function(config,
  name='or_f',
  desc='logical or',
- define='lambda a,b: notzero(plus(a,b))',
- fast='lambda a,b: 1 if a or b else 0'
+ define='lambda a,b: notzero(plus(a,b))'
 )
 
 or_f3=basic_function(config,

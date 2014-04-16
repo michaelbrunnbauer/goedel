@@ -8,10 +8,7 @@ print
 
 for f in config.functions:
     print f.definition_intro()
-    if f.name.startswith('ispeanoaxiom'):
-        print f.definition()
-    else:
-        print prettyprint(f.definition())
+    print prettyprint(f.definition())
     print
     print
     if f.name=='bitslice':
