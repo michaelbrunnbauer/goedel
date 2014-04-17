@@ -5,6 +5,12 @@ from functions import *
 def succ(a):
     return a+1
 
+def plus(a,b):
+    return a+b
+
+def mul(a,b):
+    return a*b
+
 for a in range(257):
     exec('n'+str(a)+'='+str(a))
 
@@ -47,14 +53,6 @@ notzero=primitive_recursive_function(config,
  next='lambda n: n1'
 )
 
-plus=primitive_recursive_function(config,
- name='plus',
- desc='addition',
- zero='lambda b: b',
- next='lambda a,b: succ(plus(a,b))',
- fast='lambda a,b: a+b'
-)
-
 minus_rev=primitive_recursive_function(config,
  name='minus_rev',
  desc='proper subtraction b-a',   
@@ -75,14 +73,6 @@ minusfull=basic_function(config,
  desc='proper subtraction',
  define='lambda a,b: minus_rev(b,a)',
  fast='lambda a,b: a-b if a >= b else 0'
-)
-
-mul=primitive_recursive_function(config,
- name='mul',
- desc='multiplication',
- zero='lambda b: n0',
- next='lambda a,b: plus(mul(a,b),b)',
- fast='lambda a,b: a*b'
 )
 
 and_f=basic_function(config,

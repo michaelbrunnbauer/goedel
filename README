@@ -132,9 +132,9 @@ rule allows to permutate to get the required order for rule 5:
 
 You can find example proofs in the subdirectory proofs.
 
-The primitive recursive definitions use the symbols n0 (the number 0) and
-successor function succ(). They start with the definition of n1-n256 
-(the numbers 1-256).
+The primitive recursive definitions use the symbols n0, succ(), plus() and 
+mul() for the number 0, the successor function, addition and multiplication.
+They start with the definition of n1-n256 (the numbers 1-256).
 
 There are five types of functions (see functions.py):
 

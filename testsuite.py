@@ -33,8 +33,6 @@ def testsuite():
     assert goedelstring(gn(s))==s
 
     assert ac(1) == 0
-    assert plus(11,5) == 16
-    assert mul(11,5) == 55
     assert cond(3,1,2) == 1
     assert cond(0,1,2) == 2
     assert minus(2,2) == 0
@@ -65,7 +63,7 @@ def testsuite():
     assert length(255) == 1 
 
     # doing this by hand from now on would break our neck (or stack)
-    config.fastfunctions=set(['plus','minus','minusfull','smaller','equal'])
+    config.fastfunctions=set(['minus','minusfull','smaller','equal'])
 
     assert length(256) == 2
     s=gn('ab')

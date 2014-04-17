@@ -19,7 +19,7 @@ class configuration(object):
         self.optimize=False
 
         self.functions=[]
-        self.symbols=set(['succ'])
+        self.symbols=set(['succ','plus','mul'])
         for x in range(257):
             self.symbols.add('n'+str(x))
 
