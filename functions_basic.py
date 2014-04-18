@@ -57,7 +57,7 @@ minus_rev=primitive_recursive_function(config,
  name='minus_rev',
  desc='proper subtraction b-a',   
  zero='lambda b: b',
- next='lambda a,b: ac(minus_rev(a,b))'
+ next='lambda a,b: acfull(minus_rev(a,b))'
 )
  
 minus=basic_function(config,
@@ -202,27 +202,25 @@ ifzero=basic_function(config,
  define='lambda a,b: cond(a,a,b)'
 )
 
-smaller=primitive_recursive_function(config,
- name='smaller',
- desc='1 if a smaller b, else 0',
- zero='lambda b: notzero(b)',
- next='lambda a,b: smaller(a,acfull(b))',
- fast='lambda a,b: 1 if a < b else 0'
-)
-
-equal=primitive_recursive_function(config,
- name='equal',
- desc='1 if a==b, else 0',
- zero='lambda b: zero(b)',
- next='lambda a,b: cond(b,equal(a,acfull(b)),n0)',
- fast='lambda a,b: 1 if a==b else 0'
-)
-
 smallereq=basic_function(config,
  name='smallereq',
  desc='a smaller or equal b',
- define='lambda a,b: or_f(equal(a,b),smaller(a,b))',
+ define='lambda a,b: zero(minusfull(a,b))',
  fast='lambda a,b: 1 if a<=b else 0'
+)
+
+smaller=basic_function(config,
+ name='smaller',
+ desc='1 if a smaller b, else 0',
+ define='lambda a,b: not_f(smallereq(b,a))',
+ fast='lambda a,b: 1 if a < b else 0'
+)
+
+equal=basic_function(config,
+ name='equal',
+ desc='1 if a==b, else 0',
+ define='lambda a,b: and_f(smallereq(a,b),smallereq(b,a))',
+ fast='lambda a,b: 1 if a == b else 0'
 )
 
 div=argmin_function(config,
