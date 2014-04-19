@@ -132,8 +132,8 @@ rule allows to permutate to get the required order for rule 5:
 
 You can find example proofs in the subdirectory proofs.
 
-The primitive recursive definitions use the symbols n0, succ(), plus() and 
-mul() for the number 0, the successor function, addition and multiplication.
+The primitive recursive definitions use the symbols n0, sc(), ad() and 
+mu() for the number 0, the successor function, addition and multiplication.
 They start with the definition of n1-n256 (the numbers 1-256).
 
 There are five types of functions (see functions.py):
@@ -170,3 +170,7 @@ Use checkproof.py <file> to check a proof in ASCII-file <file> for vadility
 using computation on its Gödel number.
 
 Use testsuite.py to run a testsuite.
+
+Use elementaryformula.py to convert a term into a almost elementary formula 
+using only n0-n256, su(), ad() and mu() - almost because the symbols
+n1-n256 are not elementary but can easily be replaced with succ() and n0.

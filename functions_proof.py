@@ -24,7 +24,7 @@ isimplicationfromtwosequences=basic_function(config,
 proofitem=basic_function(config,
  name='proofitem',
  desc='nth statement in sequence of sequences x delimited by \\n',
- define='lambda n,x: slice(succ(find(acfull(n),n10,x)),acfull(find(n,n10,x)),x)'
+ define='lambda n,x: slice(sc(find(acfull(n),n10,x)),acfull(find(n,n10,x)),x)'
 )
 
 prooflength=basic_function(config,

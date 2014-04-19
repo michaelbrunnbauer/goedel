@@ -34,7 +34,11 @@ def termlist(s):
 def isvariable(s):
     if not s:
         return False
+    if not s[0].isalpha():
+        return False
     for c in s:
+         if c.isalpha() and not c.islower():
+             return False
          if not c.isalnum() and not c=='_':
              return False
     return True
@@ -86,3 +90,91 @@ def reformat(parsedterm,optimizeandor=False):
     rueck=rueck[:-1]
     rueck+=')'
     return rueck
+
+# variable generator
+#class vindex(object):
+#    def __init__(self):
+#        self.index=0
+#    def new(self):
+#        self.index+=1
+#        return 'x'+str(self.index)
+
+# alternative variable generator, does not make things much shorter
+class vindex(object):
+    def __init__(self,donotuse=None):
+        self.digits=[0]
+        # not strictly necessary
+        self.donotuse=set(['sc','ad','mu'])
+        if donotuse:
+            for v in donotuse:
+                self.donotuse.add(v)
+
+    def increment(self,digit):
+        a=self.digits[digit]
+        a+=1
+        if digit==0:
+            if a==25:
+                self.digits[0]=0
+                self.digits.append(0)
+            else:
+                self.digits[0]=a
+        else:
+            if a==35:
+                self.digits[digit]=0
+                self.increment(digit-1)
+            else:
+                self.digits[digit]=a
+
+    def new(self):
+        while True:
+            # without n
+            chars="abcdefghijklmopqrstuvwxyz0123456789"
+            rueck=''
+            for digit in self.digits:
+                rueck+=chars[digit]
+            self.increment(len(self.digits)-1)
+            if rueck not in self.donotuse:
+                break
+        return rueck
+
+def replaceparams(parsedterm,params,paramsnew):
+    if parsedterm[1] is None:
+        if parsedterm[0] not in params:
+            return (parsedterm[0],None)
+        i=0
+        while i<len(params):
+            if params[i]==parsedterm[0]:
+                return (paramsnew[i],None)
+            i+=1
+    tlist1=[]
+    for term in parsedterm[1]:
+        tlist1.append(replaceparams(term,params,paramsnew))
+    return (parsedterm[0],tlist1)
+
+def isbasicterm1(parsedterm):
+    if parsedterm is None:
+        return False
+    lcname,tlist=parsedterm
+    if tlist is None:
+        return True
+    if lcname not in ('sc','ad','mu'):
+        return False
+    for term in tlist:
+        if not isbasicterm1(term):
+            return False
+    return True
+
+def isbasicterm(s):
+    parsedterm=parseterm(s)
+    assert parsedterm is not None,s
+    return isbasicterm1(parsedterm)
+
+def termvariables(parsedterm):
+    lcname,tlist=parsedterm
+    if tlist is None:
+        return [lcname]
+    rueck=[]
+    for term in tlist:
+        rueck+=termvariables(term)
+    return rueck
+

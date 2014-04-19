@@ -26,18 +26,7 @@ h(0) = expression returning r(0) - which is 0 or 1
 h(x+1) = h(x) + f(x+1,h(x))*(2**(x+1))
 recursive_r(y,x) = bitset(y,x)
 f(x,y) = expression returning r(x) using recursive_r(y,a) where a < x
-
-All recursive_r(y,x) used later will be defined now. This way, a recursive
-relation can even be used before it is defined - if a suitable value of h(x)
-is provided as parameter y. Computation of h(x) is not feasible so we will
-replace all calls to recursive_r with calls to f(x,None) during computation.
 """
-        for f1 in config.functions:
-            if type(f1)==recursive_relation:
-                print 'Definition of recursive_'+f1.name+':'
-                print prettyprint(f1.definition1())
-                print
-                print
 
         print """Assume you want to define a primitive recursive function r(x) like this:
 r(0) = expression
@@ -57,17 +46,4 @@ recursive_r(y,x) = bitslice(y,bitstart(x),bitstart(x+1)-1)
 f(x,y) = expression calculating the value for r(x) using recursive_r(y,a)
          where a < x
 r(x) = recursive_r(h(x),x)
-
-All bitstart(x) and recursive_r(y,x) used later will be defined now.
-This way, a recursive function can even be used before it is defined - if a 
-suitable value of h(x) is provided as parameter y. Computation of h(x) is not
-feasible so we will replace all calls to recursive_r with calls to f(x,None)
-during computation.
 """
-        for f1 in config.functions:
-            if type(f1)==recursive_function:
-                print 'Definition of bitstart_'+f1.name+'/recursive_'+f1.name+':'
-                print prettyprint(f1.definition1())
-                print
-                print
-

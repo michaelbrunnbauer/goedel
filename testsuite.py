@@ -170,8 +170,8 @@ def testsuite():
     assert isconjunction(0) == 0
 
     assert number(0) == gn('n0')
-    assert number(1) == gn('succ(n0)')
-    assert number(2) == gn('succ(succ(n0))')
+    assert number(1) == gn('sc(n0)')
+    assert number(2) == gn('sc(sc(n0))')
 
     x=gn('x')
     assert isfreeintermlist(0,x) == 0

@@ -1,14 +1,14 @@
 from functions import *
 
-# we assume n0, succ() and = are symbols of the theory 
+# we assume n0, sc() and = are symbols of the theory 
 
-def succ(a):
+def sc(a):
     return a+1
 
-def plus(a,b):
+def ad(a,b):
     return a+b
 
-def mul(a,b):
+def mu(a,b):
     return a*b
 
 for a in range(257):
@@ -17,7 +17,7 @@ for a in range(257):
 def basic_definitions():
     rueck=''
     for a in range(1,257):
-        rueck+='n'+str(a)+'=succ(n'+str(a-1)+')\n'
+        rueck+='n'+str(a)+'=sc(n'+str(a-1)+')\n'
     return rueck[:-1]
 
 config=configuration(globals())
@@ -78,7 +78,7 @@ minusfull=basic_function(config,
 and_f=basic_function(config,
  name='and_f',
  desc='logical and',
- define='lambda a,b: mul(notzero(a),notzero(b))'
+ define='lambda a,b: mu(notzero(a),notzero(b))'
 )
 
 and_f3=basic_function(config,
@@ -132,7 +132,7 @@ and_f10=basic_function(config,
 or_f=basic_function(config,
  name='or_f',
  desc='logical or',
- define='lambda a,b: notzero(plus(a,b))'
+ define='lambda a,b: notzero(ad(a,b))'
 )
 
 or_f3=basic_function(config,
@@ -192,7 +192,7 @@ not_f=basic_function(config,
 cond=basic_function(config,
  name='cond',   
  desc='returns a if c != 0, else b',
- define='lambda c,a,b: plus(mul(notzero(c),a),mul(zero(c),b))',
+ define='lambda c,a,b: ad(mu(notzero(c),a),mu(zero(c),b))',
  fast='lambda c,a,b: b if c==0 else a'
 )
 
@@ -227,7 +227,7 @@ div=argmin_function(config,
  name='div',
  desc='division',
  max='lambda a,b: a',
- relation='lambda x,a,b: and_f(notzero(smallereq(mul(x,b),a)),zero(smallereq(mul(succ(x),b),a)))',
+ relation='lambda x,a,b: zero(smallereq(mu(sc(x),b),a))',
  fast='lambda a,b: a / b',
  asserts='lambda a,b: b!=0'
 )
@@ -235,7 +235,7 @@ div=argmin_function(config,
 modulo=basic_function(config,
  name='modulo',
  desc='modulo operator',
- define='lambda a,b: minus(a,mul(div(a,b),b))',
+ define='lambda a,b: minus(a,mu(div(a,b),b))',
  fast='lambda a,b: a % b',
  asserts='lambda a,b: b!=0'
 )
@@ -244,7 +244,7 @@ pow_rev=primitive_recursive_function(config,
  name='pow_rev',
  desc='b**a',
  zero='lambda b: n1',
- next='lambda a,b: mul(b,pow_rev(a,b))',
+ next='lambda a,b: mu(b,pow_rev(a,b))',
  fast='lambda a,b: b**a'
 )
 

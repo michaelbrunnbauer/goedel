@@ -1,5 +1,7 @@
 # classes to generate primitive recursive functions
 
+from StringIO import StringIO
+
 import parseterm
 
 class configuration(object):
@@ -19,7 +21,7 @@ class configuration(object):
         self.optimize=False
 
         self.functions=[]
-        self.symbols=set(['succ','plus','mul'])
+        self.symbols=set(['sc','ad','mu'])
         for x in range(257):
             self.symbols.add('n'+str(x))
 
@@ -88,9 +90,12 @@ class basefunction(object):
             params=[]
             s=' '.join(s[1:])
         elif s[1].endswith(':'):
-            params=s[1][:-1].split(',')
-            for param in params:
-                assert param,params
+            params1=s[1][:-1].split(',')
+            params=[]
+            for param in params1:
+                if param:
+                    assert param not in ('sc','ad','mu'),s
+                    params.append(param)
             s=' '.join(s[2:])
         else:
             assert False,s
@@ -100,7 +105,7 @@ class basefunction(object):
         return params,s
 
     def addsymbol(self,s):
-        assert s not in self.config.symbols
+        assert s not in self.config.symbols,s
         self.config.symbols.add(s)
 
     # check that a symbol is defined
@@ -159,6 +164,95 @@ class basefunction(object):
             rueck+='\nPython fast computation: '+fastsource
         return rueck
 
+    def getfunction(self,name):
+        for f in self.config.functions:
+            if f.name==name:
+                return f
+        assert False,name
+
+    # return variable for term rm(a,b) = remainder of a / b
+    # necessary assertions about variable are added to formulae
+    # variables needing existential quantification are added to freevariables
+    # ind is a structure holding the biggest variable index
+    def getterm_rm(self,params,ind,formulae,freevariables):
+        assert len(params)==2
+        for param in params:
+            assert parseterm.isbasicterm(param)
+        id=ind.new()
+        freevariables.append(id)
+        ic=ind.new()
+        rueck='~!'+ic+':~'+params[0]+'=ad(mu('+params[1]+','+ic+'),'+id+')'
+        formulae.append(rueck)
+        return id
+
+    # return variable for term si(a,m,i) = rm(a,m*(i+1)+1)
+    # necessary assertions about variable are added to formulae
+    # variables needing existential quantification are added to freevariables
+    # ind is a structure holding the biggest variable index
+    def getterm_si(self,params,ind,formulae,freevariables):
+        assert len(params)==3
+        for param in params:
+            assert parseterm.isbasicterm(param)
+        y='sc(mu('+params[1]+',sc('+params[2]+')))'
+        return self.getterm_rm([params[0],y],ind,formulae,freevariables)
+
+    # return term/variable for parsed term
+    # necessary assertions about variable are added to formulae
+    # variables needing existential quantification are added to freevariables
+    # ind is a structure holding the biggest variable index
+    def getterm1(self,parsedterm,formulae,ind,freevariables):
+        lcname,tlist=parsedterm
+        if tlist is None:
+            return lcname
+
+        if lcname in ('sc','ad','mu'):
+            rueck=lcname+'('
+            for term in tlist:
+                rueck+=self.getterm1(term,formulae,ind,freevariables)+','
+            rueck=rueck[:-1]+')'
+            return rueck
+        else:
+            params=[]
+            for term in tlist:
+                params.append(self.getterm1(term,formulae,ind,freevariables))
+            if lcname=='si':
+                return self.getterm_si(params,ind,formulae,freevariables)
+            else:
+                f=self.getfunction(lcname)
+                return f.getterm(params,ind,formulae,freevariables)
+
+    # return term/variable for lambda expression l
+    # necessary assertions about variable are added to formulae
+    # variables needing existential quantification are added to freevariables
+    # ind is a structure holding the biggest variable index
+    def getterm2(self,l,params,ind,formulae,freevariables):
+        params1,source=self.lambdasource(l)
+        assert len(params)==len(params1)
+        parsedterm=parseterm.parseterm(source)
+        parsedterm=parseterm.replaceparams(parsedterm,params1,params)
+        return self.getterm1(parsedterm,formulae,ind,freevariables)
+
+    # return formula composed of conjunction of formulae with existential 
+    # quantification for a variables in freevariables
+    def composeformula(self,formulae,freevariables):
+        assert formulae
+        rueck=StringIO()
+        rueck.write('~')
+        while freevariables:
+            v=freevariables.pop()
+            rueck.write('!'+v+':')
+        rueck.write('~')
+        rueck.write('('*(len(formulae)-1))
+        first=True
+        while formulae:
+            formula=formulae.pop()
+            if first:
+                first=False
+                rueck.write(formula)
+            else:
+                rueck.write('&'+formula+')')
+        return rueck.getvalue()
+
 # function defined by expression define(...)
 class basic_function(basefunction):
 
@@ -181,15 +275,15 @@ class basic_function(basefunction):
         else:
             return self.define_f(*args)
 
-    def definition(self,formal=False):
+    def definition(self):
         rueck=''
         params,source=self.lambdasource(self.define)
-        if formal:
-            for param in params:
-                rueck+='!'+param+':'
         params=','.join(params)
         rueck+=self.name+'('+params+')='+source
         return rueck
+
+    def getterm(self,params,ind,formulae,freevariables):
+        return self.getterm2(self.define,params,ind,formulae,freevariables)
 
 # function f defined by primitive recursion
 # zero = value for f(0,...) (first parameter omitted)
@@ -223,7 +317,7 @@ class primitive_recursive_function(basefunction):
             else:
                 return self.zero_f(*args)
         else:
-            # we could compute n-1 with succ(), == and forward counting
+            # we could compute n-1 with sc(), == and forward counting
             # recursion here but this seems pointless
             args=(n-1,) + args[1:]
             if self.config.optimize:
@@ -231,7 +325,7 @@ class primitive_recursive_function(basefunction):
             else:
                 return self.next_f(*args)
 
-    def definition(self,formal=False):
+    def definition(self):
         rueck=''
         zeroparams,zerosource=self.lambdasource(self.zero)
         nextparams,nextsource=self.lambdasource(self.next)
@@ -240,15 +334,42 @@ class primitive_recursive_function(basefunction):
         restparams=','.join(nextparams[1:])
         if restparams:
             restparams=','+restparams
-        if formal:
-            for param in zeroparams:
-                rueck+='!'+param+':'
         rueck+=self.name+'(n0'+restparams+')='+zerosource+'\n'
-        if formal:
-            for param in nextparams:
-                rueck+='!'+param+':'
-        rueck+=self.name+'(succ('+firstparam+')'+restparams+')='+nextsource
+        rueck+=self.name+'(sc('+firstparam+')'+restparams+')='+nextsource
         return rueck
+
+    def getterm(self,params,ind,formulae,freevariables):
+        assert parseterm.isbasicterm(params[0]),params[0]
+        ai=ind.new()
+        mi=ind.new()
+        freevariables.append(ai)
+        freevariables.append(mi)
+        si1=self.getterm_si([ai,mi,'n0'],ind,formulae,freevariables)
+        si2=self.getterm_si([ai,mi,params[0]],ind,formulae,freevariables)
+        ii=ind.new()
+        myformulae=[]
+        myfreevariables=[]
+        si3=self.getterm_si([ai,mi,'sc('+ii+')'],ind,myformulae,myfreevariables)
+        f0=self.getterm2(self.zero,params[1:],ind,myformulae,myfreevariables)
+        
+        nextparams,nextsource=self.lambdasource(self.next)
+        nextcall=self.name+'('+','.join(nextparams)+')'
+        nextsource=nextsource.replace(nextcall,'si('+ai+','+mi+','+ii+')')
+        assert self.name+'(' not in nextsource,(self.name,nextsource)
+        nextl='lambda '+','.join(nextparams)+': '+nextsource
+
+        fx=self.getterm2(nextl,params,ind,myformulae,myfreevariables)
+
+        myformulae.append(si3+'='+fx)
+        rueck=self.composeformula(myformulae,myfreevariables)
+
+        zi=ind.new()
+        smallerf='~!'+zi+':ad('+ii+',sc('+zi+'))='+params[0]
+
+        rueck='!'+ii+':~('+smallerf+'&~'+rueck+')'
+        formulae.append(rueck)
+        formulae.append(si1+'='+f0)
+        return si2
 
 # returns the smallest x <= max(...) for which relation(x,...) == 1
 class argmin_function(basefunction):
@@ -268,7 +389,40 @@ class argmin_function(basefunction):
         self.asserts=asserts
         self.checksymbols(max)
         self.checksymbols(relation)
-        self.addsymbol(self.name)
+        self.me=self.gendefinition()
+
+    def gendefinition(self):
+        params,source=self.lambdasource(self.relation)
+        assert len(params)
+        firstparam=params[0]
+        restparams=','.join(params[1:])
+        if restparams:
+            restparams=','+restparams
+
+        relation=basic_function(self.config,
+         name='relation_'+self.name,
+         desc='part of definition for '+self.name,
+         define='lambda '+firstparam+restparams+': '+source)
+
+        argmin=primitive_recursive_function(self.config,
+         name='argmin_'+self.name,
+         desc='part of definition for '+self.name,
+         zero='lambda '+restparams+': n0',
+         next='lambda '+firstparam+restparams+': ifzero(argmin_'+self.name+'('+firstparam+restparams+'),cond(relation_'+self.name+'(sc('+firstparam+')'+restparams+'),sc('+firstparam+'),n0))')
+
+        maxparams,maxsource=self.lambdasource(self.max)
+        maxparams=','.join(maxparams)
+        if maxparams:
+            assert ','+maxparams==restparams
+        else:
+            assert maxparams==restparams
+
+        me=basic_function(self.config,
+         name=self.name,
+         desc=self.desc,
+         define='lambda '+maxparams+': argmin_'+self.name+'('+maxsource+restparams+')')
+        popv=self.config.functions.pop(-1)
+        return me
 
     def call(self,*args):
         if self.config.optimize:
@@ -288,40 +442,11 @@ class argmin_function(basefunction):
             x+=1
         return 0
 
-    def definition(self,formal=False):
-        rueck=''
+    def definition(self):
+        return self.me.definition()
 
-        params,source=self.lambdasource(self.relation)
-        assert len(params)
-        firstparam=params[0]
-        restparams=','.join(params[1:])
-        if restparams:
-            restparams=','+restparams   
-
-        if formal:
-            for param in params:
-                rueck+='!'+param+':'
-        rueck+='relation_'+self.name+'('+firstparam+restparams+')='+source+'\n'
-        if formal:
-            for param in params[1:]:
-                rueck+='!'+param+':'
-        rueck+='argmin_'+self.name+'(n0'+restparams+')=n0\n'
-        if formal:
-            for param in params:
-                rueck+='!'+param+':'
-        rueck+='argmin_'+self.name+'(succ('+firstparam+')'+restparams+')='
-        rueck+='ifzero(argmin_'+self.name+'('+firstparam+restparams+'),cond(relation_'+self.name+'(succ('+firstparam+')'+restparams+'),succ('+firstparam+'),n0))\n'
-        maxparams,maxsource=self.lambdasource(self.max)
-        maxparams=','.join(maxparams)
-        if maxparams:
-            assert ','+maxparams==restparams
-        else:
-            assert maxparams==restparams
-        if formal:
-            for param in params[1:]:
-                rueck+='!'+param+':'
-        rueck+=self.name+'('+maxparams+')=argmin_'+self.name+'('+maxsource+restparams+')'
-        return rueck
+    def getterm(self,params,ind,formulae,freevariables):
+        return self.me.getterm(params,ind,formulae,freevariables)
 
 # see explanation contained in / printed by printdefinitions
 class recursive_relation(basefunction):
@@ -341,7 +466,7 @@ class recursive_relation(basefunction):
         self.asserts=asserts
         self.checksymbols(zero)
         self.checksymbols(relation)
-        self.addsymbol(self.name)
+        self.me=self.gendefinition()
 
     def call(self,*args):
         n=args[0]
@@ -362,11 +487,13 @@ class recursive_relation(basefunction):
             assert result in (0,1),result
             return result
 
-    def definition(self,formal=False):
+    def gendefinition(self):
         zeroparams1,zerosource=self.lambdasource(self.zero)
         relparams1,relsource=self.lambdasource(self.relation)
         assert len(relparams1) == len(zeroparams1)+2
         assert relparams1[1:-1] == zeroparams1
+
+        params=[relparams1[-1]]+relparams1[:-1]
 
         firstparam=relparams1[0]
         lastparam=relparams1[-1]
@@ -376,36 +503,35 @@ class recursive_relation(basefunction):
         myparams1=relparams1[:-1]
         myparams=self.plist(myparams1)
         relparams=self.plist(relparams1)
-        rueck=''
-        if formal:
-            for param in relparams1:
-                rueck+='!'+param+':'
-        rueck+='f_'+self.name+'('+relparams+')='+relsource+'\n'
-        if formal:
-            for param in zeroparams1:
-                rueck+='!'+param+':'
-        rueck+='h_'+self.name+'(n0'+zeroparams+')='+zerosource+'\n'
-        if formal:
-            for param in myparams1:
-                rueck+='!'+param+':'
-        rueck+='h_'+self.name+'(succ('+firstparam+')'+zeroparams+')=plus(h_'+self.name+'('+myparams+'),mul(f_'+self.name+'(succ('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,succ('+firstparam+'))))\n'
-        if formal:
-            for param in myparams1:
-                rueck+='!'+param+':'
-        rueck+=self.name+'('+myparams+')=bitset(h_'+self.name+'('+myparams+'),'+firstparam+')'
-        return rueck
 
-    # definition of recursive_r(y,a,...). separate because may be printed
-    # earlier
-    def definition1(self,formal=True):
-        relparams,relsource=self.lambdasource(self.relation)
-        params=[relparams[-1]]+relparams[:-1]
-        rueck=''
-        if formal:
-            for param in params:
-                rueck+='!'+param+':'
-        rueck+='recursive_'+self.name+'('+self.plist(params)+')=bitset('+params[0]+','+params[1]+')'
-        return rueck
+        me_recursive=basic_function(self.config,
+         name='recursive_'+self.name,
+         desc='part of definition for '+self.name,
+         define='lambda '+self.plist(params)+': bitset('+params[0]+','+params[1]+')')
+
+        me_f=basic_function(self.config,
+         name='f_'+self.name,
+         desc='part of definition for '+self.name,
+         define='lambda '+relparams+': '+relsource)
+
+        me_h=primitive_recursive_function(self.config,
+         name='h_'+self.name,
+         desc='part of definition for '+self.name,
+         zero='lambda '+zeroparams+': '+zerosource,
+         next='lamda '+firstparam+zeroparams+': ad(h_'+self.name+'('+myparams+'),mu(f_'+self.name+'(sc('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,sc('+firstparam+'))))')
+
+        me=basic_function(self.config,
+         name=self.name,
+         desc=self.desc,
+         define='lambda '+myparams+': bitset(h_'+self.name+'('+myparams+'),'+firstparam+')')
+        popv=self.config.functions.pop(-1)
+        return me
+
+    def definition(self):
+        return self.me.definition()
+
+    def getterm(self,params,ind,formulae,freevariables):
+        return self.me.getterm(params,ind,formulae,freevariables)
 
 # see explanation contained in / printed by printdefinitions
 class recursive_function(basefunction):
@@ -421,7 +547,7 @@ class recursive_function(basefunction):
         self.resultlen_f_opt=self.getf(resultlen,optimize=True)
         self.name_bitstart='bitstart_'+self.name
         params,source=self.lambdasource(resultlen)
-        source='lambda '+','.join(params)+': plus('+source+','+self.name_bitstart+'('+','.join(params)+'))'
+        source='lambda '+','.join(params)+': ad('+source+','+self.name_bitstart+'('+','.join(params)+'))'
 
         if len(params)==1:
             source0='lambda: n0'
@@ -429,12 +555,10 @@ class recursive_function(basefunction):
             source0='lambda '+','.join(params[1:])+': n0'
         self.bitstart_f=primitive_recursive_function(self.config,
          name=self.name_bitstart,
-         desc='',
+         desc='part of definition for '+self.name,
          zero=source0,
          next=source
         )
-        popv=self.config.functions.pop(-1)
-        assert popv.name == self.name_bitstart,popv
 
         self.zero=zero
         self.zero_f=self.getf(zero)
@@ -446,7 +570,52 @@ class recursive_function(basefunction):
         self.asserts=asserts
         self.checksymbols(zero)
         self.checksymbols(function)
-        self.addsymbol(self.name)
+        self.me=self.gendefinition()
+
+    def gendefinition(self):
+        zeroparams1,zerosource=self.lambdasource(self.zero)
+        funcparams1,funcsource=self.lambdasource(self.function)
+        assert len(funcparams1) == len(zeroparams1)+2
+        assert funcparams1[1:-1] == zeroparams1
+
+        firstparam=funcparams1[0]
+        lastparam=funcparams1[-1]
+        zeroparams=self.plist(zeroparams1)
+        if zeroparams:
+            zeroparams=','+zeroparams
+        myparams1=funcparams1[:-1]
+        myparams=self.plist(myparams1)
+        funcparams=self.plist(funcparams1)
+
+        rparams=[funcparams1[-1]]+funcparams1[:-1]
+        rparams1=rparams[2:]
+        rparams1=','.join(rparams1)
+        if rparams1:
+            rparams1=','+rparams1
+
+        me_recursive=basic_function(self.config,
+         name='recursive_'+self.name,
+         desc='part of definition for '+self.name,
+         define='lambda '+self.plist(rparams)+': bitslice('+rparams[0]+','+self.name_bitstart+'('+self.plist(rparams[1:])+'),acfull('+self.name_bitstart+'(sc('+rparams[1]+')'+rparams1+')))')
+
+        me_f=basic_function(self.config,
+         name='f_'+self.name,
+         desc='part of definition for '+self.name,
+         define='lambda '+funcparams+': '+funcsource)
+
+        me_h=primitive_recursive_function(self.config,
+         name='h_'+self.name,
+         desc='part of definition for '+self.name,
+         zero='lambda '+zeroparams+': '+zerosource,
+         next='lambda '+firstparam+zeroparams+': ad(h_'+self.name+'('+myparams+'),mu(f_'+self.name+'(sc('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,'+self.name_bitstart+'(sc('+rparams[1]+')'+rparams1+'))))')
+
+        me=basic_function(self.config,
+         name=self.name,
+         desc=self.desc,
+         define='lambda '+myparams+': recursive_'+self.name+'(h_'+self.name+'('+myparams+'),'+myparams+')')
+
+        popv=self.config.functions.pop(-1)
+        return me
 
     def call(self,*args):
         n=args[0]
@@ -475,58 +644,8 @@ class recursive_function(basefunction):
             assert result.bit_length() <= bits_this,(result.bit_length(),bits_this)
             return result
 
-    def definition(self,formal=False):
-        zeroparams1,zerosource=self.lambdasource(self.zero)
-        funcparams1,funcsource=self.lambdasource(self.function)
-        assert len(funcparams1) == len(zeroparams1)+2
-        assert funcparams1[1:-1] == zeroparams1
+    def definition(self):
+        return self.me.definition()
 
-        firstparam=funcparams1[0]
-        lastparam=funcparams1[-1]
-        zeroparams=self.plist(zeroparams1)
-        if zeroparams:
-            zeroparams=','+zeroparams
-        myparams1=funcparams1[:-1]
-        myparams=self.plist(myparams1)
-        funcparams=self.plist(funcparams1)
-
-        rparams=[funcparams1[-1]]+funcparams1[:-1]
-        rparams1=rparams[2:]
-        rparams1=','.join(rparams1)
-        if rparams1:
-            rparams1=','+rparams1
-
-        rueck=''
-        if formal:
-            for param in funcparams1:
-                rueck+='!'+param+':'
-        rueck+='f_'+self.name+'('+funcparams+')='+funcsource+'\n'
-        if formal:
-            for param in zeroparams1:
-                rueck+='!'+param+':'
-        rueck+='h_'+self.name+'(n0'+zeroparams+')='+zerosource+'\n'
-        if formal:
-            for param in myparams1:
-                rueck+='!'+param+':'
-        rueck+='h_'+self.name+'(succ('+firstparam+')'+zeroparams+')=plus(h_'+self.name+'('+myparams+'),mul(f_'+self.name+'(succ('+firstparam+')'+zeroparams+',h_'+self.name+'('+myparams+')),pow(n2,'+self.name_bitstart+'(succ('+rparams[1]+')'+rparams1+'))))\n'
-        if formal:
-            for param in myparams1:
-                rueck+='!'+param+':'
-        rueck+=self.name+'('+myparams+')=recursive_'+self.name+'(h_'+self.name+'('+myparams+'),'+myparams+')'
-        return rueck
-
-
-    def definition1(self,formal=False):
-        funcparams1,funcsource=self.lambdasource(self.function)
-        rparams=[funcparams1[-1]]+funcparams1[:-1]
-        rparams1=rparams[2:]
-        rparams1=','.join(rparams1)
-        if rparams1:
-            rparams1=','+rparams1
-
-        rueck=self.bitstart_f.definition(formal=formal)+'\n'
-        if formal:
-            for param in rparams:
-                rueck+='!'+param+':'
-        rueck+='recursive_'+self.name+'('+self.plist(rparams)+')=bitslice('+rparams[0]+','+self.name_bitstart+'('+self.plist(rparams[1:])+'),acfull('+self.name_bitstart+'(succ('+rparams[1]+')'+rparams1+')))'
-        return rueck
+    def getterm(self,params,ind,formulae,freevariables):
+        return self.me.getterm(params,ind,formulae,freevariables)

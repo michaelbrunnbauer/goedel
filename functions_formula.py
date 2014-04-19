@@ -32,7 +32,7 @@ istermlist1=argmin_function(config,
  name='istermlist1',
  desc='returns position of , if x has the form istermlist , isterm',
  max='lambda x,termcode,termlistcode: length(x)',
- relation='lambda pos,x,termcode,termlistcode: and_f3(equal(item(pos,x),n44),recursive_istermlist_help(termlistcode,slice(n1,acfull(pos),x),termcode),recursive_isterm(termcode,slice(succ(pos),length(x),x)))'
+ relation='lambda pos,x,termcode,termlistcode: and_f3(equal(item(pos,x),n44),recursive_istermlist_help(termlistcode,slice(n1,acfull(pos),x),termcode),recursive_isterm(termcode,slice(sc(pos),length(x),x)))'
 )
 
 # needs termcode
@@ -52,7 +52,7 @@ isterm1=argmin_function(config,
  name='isterm1',
  desc='returns position of ( if x has the form isnamelc ( istermlist )',
  max='lambda x,termcode: length(x)',
- relation='lambda pos,x,termcode: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnamelc(slice(n1,acfull(pos),x)),istermlist_help(slice(succ(pos),acfull(length(x)),x),termcode))'
+ relation='lambda pos,x,termcode: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnamelc(slice(n1,acfull(pos),x)),istermlist_help(slice(sc(pos),acfull(length(x)),x),termcode))'
 )
 
 isterm=recursive_relation(config,
@@ -66,7 +66,7 @@ istermlist2=argmin_function(config,
  name='istermlist2',
  desc='returns position of , if x has the form istermlist , isterm (using the now defined isterm)',
  max='lambda x,termlistcode: length(x)',
- relation='lambda pos,x,termlistcode: and_f3(equal(item(pos,x),n44),recursive_istermlist(termlistcode,slice(n1,acfull(pos),x)),isterm(slice(succ(pos),length(x),x)))'
+ relation='lambda pos,x,termlistcode: and_f3(equal(item(pos,x),n44),recursive_istermlist(termlistcode,slice(n1,acfull(pos),x)),isterm(slice(sc(pos),length(x),x)))'
 )
 
 istermlist=recursive_relation(config,
@@ -80,7 +80,7 @@ termlistpos=argmin_function(config,
  name='termlistpos',
  desc='returns position of ( if x has the form isnamelc ( istermlist )',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnamelc(slice(n1,acfull(pos),x)),istermlist(slice(succ(pos),acfull(length(x)),x)))'
+ relation='lambda pos,x: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnamelc(slice(n1,acfull(pos),x)),istermlist(slice(sc(pos),acfull(length(x)),x)))'
 )
 
 term_namelc=basic_function(config,
@@ -92,14 +92,14 @@ term_namelc=basic_function(config,
 term_termlist=basic_function(config,
  name='term_termlist',
  desc='returns termlist if x has the form namelc ( termlist )',
- define='lambda x: cond(notzero(termlistpos(x)),slice(succ(termlistpos(x)),acfull(length(x)),x),n0)'
+ define='lambda x: cond(notzero(termlistpos(x)),slice(sc(termlistpos(x)),acfull(length(x)),x),n0)'
 )
 
 lasttermpos=argmin_function(config,
  name='lasttermpos',
  desc='returns position of , if x has the form termlist , term',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f3(equal(item(pos,x),n44),istermlist(slice(n1,acfull(pos),x)),isterm(slice(succ(pos),length(x),x)))'
+ relation='lambda pos,x: and_f3(equal(item(pos,x),n44),istermlist(slice(n1,acfull(pos),x)),isterm(slice(sc(pos),length(x),x)))'
 )
 
 termlist_start=basic_function(config,
@@ -111,7 +111,7 @@ termlist_start=basic_function(config,
 termlist_end=basic_function(config,
  name='termlist_end',
  desc='returns term if x has the form termlist, term',
- define='lambda x: cond(notzero(lasttermpos(x)),slice(plus(n2,acfull(lasttermpos(x))),length(x),x),n0)'
+ define='lambda x: cond(notzero(lasttermpos(x)),slice(ad(n2,acfull(lasttermpos(x))),length(x),x),n0)'
 )
 
 # isproposition:
@@ -120,7 +120,7 @@ isproposition1=argmin_function(config,
  name='isproposition1',
  desc='returns position of ( if x has the form isnameuc ( termlist )',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnameuc(slice(n1,acfull(pos),x)),istermlist(slice(succ(pos),acfull(length(x)),x)))'
+ relation='lambda pos,x: and_f4(equal(item(length(x),x),n41),equal(item(pos,x),n40),isnameuc(slice(n1,acfull(pos),x)),istermlist(slice(sc(pos),acfull(length(x)),x)))'
 )
 
 isproposition=basic_function(config,
@@ -138,7 +138,7 @@ proposition_nameuc=basic_function(config,
 proposition_termlist=basic_function(config,
  name='proposition_termlist',
  desc='returns termlist if x has the form nameuc ( termlist )',
- define='lambda x: cond(isproposition(x),slice(succ(isproposition1(x)),acfull(length(x)),x),n0)'
+ define='lambda x: cond(isproposition(x),slice(sc(isproposition1(x)),acfull(length(x)),x),n0)'
 )
 
 # isequation:
@@ -147,7 +147,7 @@ isequation1=argmin_function(config,
  name='isequation1',
  desc='returns position of = if x has the form term = term',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f3(equal(item(pos,x),n61),isterm(slice(n1,acfull(pos),x)),isterm(slice(succ(pos),length(x),x)))'
+ relation='lambda pos,x: and_f3(equal(item(pos,x),n61),isterm(slice(n1,acfull(pos),x)),isterm(slice(sc(pos),length(x),x)))'
 )
 
 isequation=basic_function(config,
@@ -165,7 +165,7 @@ equation_term1=basic_function(config,
 equation_term2=basic_function(config,
  name='equation_term2',
  desc='returns term2 if x has the form term1 = term2',
- define='lambda x: cond(isequation(x),slice(succ(isequation1(x)),length(x),x),n0)'
+ define='lambda x: cond(isequation(x),slice(sc(isequation1(x)),length(x),x),n0)'
 )
 
 # needs formulacode
@@ -181,7 +181,7 @@ isconjunction1_help=argmin_function(config,
  name='isconjunction1_help',
  desc='returns position of & if x has the form ( formula & formula )',
  max='lambda x,formulacode: length(x)',
- relation='lambda pos,x,formulacode: and_f5(equal(item(n1,x),n40),equal(item(length(x),x),n41),equal(item(pos,x),n38),recursive_isformula(formulacode,slice(n2,acfull(pos),x)),recursive_isformula(formulacode,slice(plus(n2,acfull(pos)),acfull(length(x)),x)))'
+ relation='lambda pos,x,formulacode: and_f5(equal(item(n1,x),n40),equal(item(length(x),x),n41),equal(item(pos,x),n38),recursive_isformula(formulacode,slice(n2,acfull(pos),x)),recursive_isformula(formulacode,slice(ad(n2,acfull(pos)),acfull(length(x)),x)))'
 )
 
 # needs formulacode
@@ -197,7 +197,7 @@ isgeneralization1_help=argmin_function(config,
  name='isgeneralization1_help',
  desc='returns position of : if x has the form ! isnamelc : formula',
  max='lambda x,formulacode: length(x)',
- relation='lambda pos,x,formulacode: and_f4(equal(item(n1,x),n33),equal(item(pos,x),n58),isnamelc(slice(n2,acfull(pos),x)),recursive_isformula(formulacode,slice(plus(n2,acfull(pos)),length(x),x)))'
+ relation='lambda pos,x,formulacode: and_f4(equal(item(n1,x),n33),equal(item(pos,x),n58),isnamelc(slice(n2,acfull(pos),x)),recursive_isformula(formulacode,slice(ad(n2,acfull(pos)),length(x),x)))'
 )
 
 # needs formulacode
@@ -227,7 +227,7 @@ isconjunction1=argmin_function(config,
  name='isconjunction1',
  desc='returns position of & if x has the form ( formula & formula )',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f5(equal(item(n1,x),n40),equal(item(length(x),x),n41),equal(item(pos,x),n38),isformula(slice(n2,acfull(pos),x)),isformula(slice(plus(n2,acfull(pos)),acfull(length(x)),x)))'
+ relation='lambda pos,x: and_f5(equal(item(n1,x),n40),equal(item(length(x),x),n41),equal(item(pos,x),n38),isformula(slice(n2,acfull(pos),x)),isformula(slice(ad(n2,acfull(pos)),acfull(length(x)),x)))'
 )
 
 isconjunction=basic_function(config,
@@ -241,7 +241,7 @@ isgeneralization1=argmin_function(config,
  name='isgeneralization1',
  desc='returns position of : if x has the form ! isnamelc : formula',
  max='lambda x: length(x)',
- relation='lambda pos,x: and_f4(equal(item(n1,x),n33),equal(item(pos,x),n58),isnamelc(slice(n2,acfull(pos),x)),isformula(slice(plus(n2,acfull(pos)),length(x),x)))'
+ relation='lambda pos,x: and_f4(equal(item(n1,x),n33),equal(item(pos,x),n58),isnamelc(slice(n2,acfull(pos),x)),isformula(slice(ad(n2,acfull(pos)),length(x),x)))'
 )
 
 isgeneralization=basic_function(config,
@@ -265,7 +265,7 @@ conjunction_formula1=basic_function(config,
 conjunction_formula2=basic_function(config,
  name='conjunction_formula2',
  desc='returns formula2 if x has the form ( formula1 & formula2 )',
- define='lambda x: cond(isconjunction(x),slice(plus(n2,acfull(isconjunction1(x))),acfull(length(x)),x),n0)'
+ define='lambda x: cond(isconjunction(x),slice(ad(n2,acfull(isconjunction1(x))),acfull(length(x)),x),n0)'
 )
 
 generalization_namelc=basic_function(config,
@@ -277,18 +277,18 @@ generalization_namelc=basic_function(config,
 generalization_formula=basic_function(config,
  name='generalization_formula',
  desc='returns formula if x has the form ! isnamelc : formula',
- define='lambda x: cond(isgeneralization(x),slice(plus(n2,acfull(isgeneralization1(x))),length(x),x),n0)'
+ define='lambda x: cond(isgeneralization(x),slice(ad(n2,acfull(isgeneralization1(x))),length(x),x),n0)'
 )
 
 getsuccx=basic_function(config,
  name='getsuccx',
- desc='returns succ(x) as term (x is supposed to be a term)',
- define='lambda x: concat(n115,concat(n117,concat(n99,concat(n99,concat(n40,concat(x,n41))))))'
+ desc='returns sc(x) as term (x is supposed to be a term)',
+ define='lambda x: concat5(n115,n99,n40,x,n41)'
 )
 
 number=primitive_recursive_function(config,
  name='number',
- desc='returns x as term expressed with n0 and succ()',
+ desc='returns x as term expressed with n0 and sc()',
  zero='lambda: concat(n110,n48)',
  next='lambda x: getsuccx(number(x))'
 )

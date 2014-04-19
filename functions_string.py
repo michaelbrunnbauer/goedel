@@ -6,14 +6,14 @@ config.globals=globals()
 rshift=basic_function(config,
  name='rshift',
  desc='right shift by b bytes',
- define='lambda a,b: div(a,pow(n2,mul(n8,b)))',
+ define='lambda a,b: div(a,pow(n2,mu(n8,b)))',
  #fast='lambda a,b: a >> b*8'
 )
 
 lshift=basic_function(config,
  name='lshift',
  desc='left shift by b bytes',
- define='lambda a,b: mul(a,pow(n2,mul(n8,b)))',
+ define='lambda a,b: mu(a,pow(n2,mu(n8,b)))',
  #fast='lambda a,b: a << b*8'
 )
 
@@ -28,13 +28,13 @@ length=argmin_function(config,
 item=basic_function(config,
  name='item',
  desc='n-th character of a string',
- define='lambda n,x: cond(smallereq(n,length(x)),minusfull(rshift(x,minusfull(length(x),n)),lshift(rshift(x,succ(minusfull(length(x),n))),n1)),n0)',
+ define='lambda n,x: cond(smallereq(n,length(x)),minusfull(rshift(x,minusfull(length(x),n)),lshift(rshift(x,sc(minusfull(length(x),n))),n1)),n0)',
 )
 
 concat=basic_function(config,
  name='concat',
  desc='concatenation of strings',
- define='lambda x,y: plus(lshift(x,length(y)),y)'
+ define='lambda x,y: ad(lshift(x,length(y)),y)'
 )
 
 concat3=basic_function(config,
@@ -77,20 +77,20 @@ right=basic_function(config,
 slice=basic_function(config,
  name='slice',
  desc='substring of x starting at position a and ending at position b',
- define='lambda a,b,x: left(minusfull(succ(b),a),right(a,x))',
+ define='lambda a,b,x: left(minusfull(sc(b),a),right(a,x))',
  asserts='lambda a,b,x: a!=0'
 )
 
 bitset=basic_function(config,
  name='bitset',
  desc='bit b of a is set (starting with bit 0)',
- define='lambda a,b: minus(div(a,pow(n2,b)),mul(div(a,pow(n2,succ(b))),n2))'
+ define='lambda a,b: minus(div(a,pow(n2,b)),mu(div(a,pow(n2,sc(b))),n2))'
 )
 
 bitslice=basic_function(config,
  name='bitslice',
  desc='returns the number corresponding to bit b-c of a (from right to left starting with 0)',
- define='lambda a,b,c: minusfull(div(a,pow(n2,b)),mul(div(a,pow(n2,succ(c))),pow(n2,minusfull(succ(c),b))))'
+ define='lambda a,b,c: minusfull(div(a,pow(n2,b)),mu(div(a,pow(n2,sc(c))),pow(n2,minusfull(sc(c),b))))'
 )
 
 isalphalc=basic_function(config,

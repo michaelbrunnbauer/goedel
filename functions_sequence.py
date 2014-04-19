@@ -21,13 +21,13 @@ occur=argmin_function(config,
  name='occur',
  desc='how often character a occurs in x',
  max='lambda a,x: length(x)',
- relation='lambda n,a,x: zero(find(succ(n),a,x))'
+ relation='lambda n,a,x: zero(find(sc(n),a,x))'
 )
 
 sitem=basic_function(config, 
  name='sitem',
  desc='nth statement in formula sequence x delimited by ;',
- define='lambda n,x: slice(succ(find(acfull(n),n59,x)),acfull(find(n,n59,x)),x)'
+ define='lambda n,x: slice(sc(find(acfull(n),n59,x)),acfull(find(n,n59,x)),x)'
 )
 
 slength=basic_function(config,
@@ -72,7 +72,7 @@ leftfromslash=basic_function(config,
 rightfromslash=basic_function(config,
  name='rightfromslash',
  desc='return string2 if x has the form string1 / string2',
- define='lambda x: cond(smaller(n1,find_pos(n47,x,n0)),slice(succ(find_pos(n47,x,n0)),length(x),x),n0)'
+ define='lambda x: cond(smaller(n1,find_pos(n47,x,n0)),slice(sc(find_pos(n47,x,n0)),length(x),x),n0)'
 )
 
 recombine=basic_function(config,
