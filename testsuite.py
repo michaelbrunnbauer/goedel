@@ -328,6 +328,37 @@ def testsuite():
     f=gn('P(x);T(x);\n')
     assert isvalidproof(f) == 0
 
+    x=gn('x')
+    assert isgeneralizationlistnotusing(0,x) == 1
+    f=gn('!y:')
+    assert isgeneralizationlistnotusing(f,x) == 1
+    f=gn('!x:')
+    assert isgeneralizationlistnotusing(f,x) == 0
+    f=gn('!y:!xx:')
+    assert isgeneralizationlistnotusing(f,x) == 1
+
+    x=gn('x')
+    assert isinductionpremise(0,x,0) == 0
+    f1=gn('P(x)')
+    f=gn('(P(n0)&!x:~(P(x)&~P(sc(x))))')
+    assert isinductionpremise(f,x,f1) == 1
+    assert isinductionpremise(f,x,0) == 0
+    f=gn('(P(n1)&!x:~(P(x)&~P(sc(x))))')
+    assert isinductionpremise(f,x,f1) == 0
+    f=gn('(P(n0)&!y:~(P(y)&~P(sc(y))))')
+    assert isinductionpremise(f,x,f1) == 0
+    f=gn('!x:(P(n0)&!x:~(P(x)&~P(sc(x))))')
+    assert isinductionpremise(f,x,f1) == 0
+    f1=gn('P(x,f(a))')
+    f=gn('(P(n0,f(a))&!x:~(P(x,f(a))&~P(sc(x),f(a))))')
+    assert isinductionpremise(f,x,f1) == 1
+    f=gn('(P(n0)&!x:~(P(x)&~P(sc(x))))')
+    assert isinductionpremise(f,x,f1) == 0
+    f=gn('(P(n0,f(a))&!x:~(P(x,f(b))&~P(sc(x),f(a))))')
+    assert isinductionpremise(f,x,f1) == 0
+    f=gn('(P(n0,f(a))&!x:~(P(x,f(a))&~P(sc(x),f(c))))')
+    assert isinductionpremise(f,x,f1) == 0
+
     checkproof('proofs/1')
     checkproof('proofs/2')
     checkproof('proofs/3')
@@ -336,6 +367,11 @@ def testsuite():
     checkproof('proofs/6')
     checkproof('proofs/7')
     checkproof('proofs/8')
+    checkproof('proofs/9')
+    checkproof('proofs/10')
+    checkproof('proofs/11')
+    checkproof('proofs/12')
+    checkproof('proofs/13')
 
 testsuite()
 print "All tests OK!"

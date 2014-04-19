@@ -1,7 +1,13 @@
 from functions import *
-from functions_calculus import *
+from functions_peanocalculus import *
 
 config.globals=globals()
+
+ispeanoaxiom=basic_function(config,
+ name='ispeanoaxiom',
+ desc='x is a peano axiom',
+ define='lambda x: or_f(isbasicpeanoaxiom(x),isinduction(x))'
+)
 
 istautology=basic_function(config,
  name='istautology',
@@ -90,7 +96,7 @@ isvalidproof=recursive_relation(config,
  name='isvalidproof',
  desc='x is a valid proof (every sequence follows directly from zero, one or two preceding sequences)',
  zero='lambda: n0',
- relation='lambda x,y: and_f3(isproof(x),or_f3(istautology(proof_end(x)),issimplyimplicatedbyone(proof_start(x),proof_end(x)),issimplyimplicatedbytwo(proof_start(x),proof_end(x))),or_f(zero(proof_start(x)),recursive_isvalidproof(y,proof_start(x))))'
+ relation='lambda x,y: and_f3(isproof(x),or_f4(ispeanoaxiom(proof_end(x)),istautology(proof_end(x)),issimplyimplicatedbyone(proof_start(x),proof_end(x)),issimplyimplicatedbytwo(proof_start(x),proof_end(x))),or_f(zero(proof_start(x)),recursive_isvalidproof(y,proof_start(x))))'
 )
 
 isvalidprooffor=basic_function(config,
