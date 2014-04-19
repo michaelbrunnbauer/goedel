@@ -7,7 +7,9 @@ from functions_proof import *
 
 term=sys.argv[1]
 parsedterm=parseterm.parseterm(term)
-assert parsedterm is not None
+if parsedterm is None:
+    print "not a valid term!"
+    sys.exit(0)
 variables=parseterm.termvariables(parsedterm)
 ind=parseterm.vindex(variables)
 formulae=[]
