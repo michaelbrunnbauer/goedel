@@ -1,4 +1,4 @@
-#!/usr/local/python64/bin/python
+#!/usr/bin/python
 
 import sys
 import parseterm
@@ -78,7 +78,7 @@ p=base256(p)
 ind=parseterm.vindex()
 vx=ind.new()
 # the goedel sentence is for all vx: term=0
-term=isvalidprooffor('+vx+',subst_formula(number('+p+'),n'+gvk+',number(number('+p+'))))'
+term='isvalidprooffor('+vx+',subst_formula(number('+p+'),n'+gvk+',number(number('+p+'))))'
 parsedterm=parseterm.parseterm(term)
 formulae=[]
 freevariables=[]

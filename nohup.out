@@ -1,0 +1,4 @@
+  File "./generategoedelsentence.py", line 81
+    term=isvalidprooffor('+vx+',subst_formula(number('+p+'),n'+gvk+',number(number('+p+'))))'
+                                                                   ^
+SyntaxError: invalid syntax
