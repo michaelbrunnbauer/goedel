@@ -29,7 +29,7 @@ vk=ind.new()
 gvk=gn(vk)
 assert gvk <= 256
 
-# p = for all vx: term=0
+# p = for all vx: not term=1
 term='isvalidprooffor('+vx+',subst_formula('+vk+',n'+str(gvk)+',number('+vk+')))'
 
 # now resolve all definitions in term to formulae
@@ -77,7 +77,7 @@ p=base256(p)
 
 ind=parseterm.vindex()
 vx=ind.new()
-# the goedel sentence is for all vx: term=0
+# the goedel sentence is for all vx: not term=1
 term='isvalidprooffor('+vx+',subst_formula(number('+p+'),n'+gvk+',number(number('+p+'))))'
 parsedterm=parseterm.parseterm(term)
 formulae=[]
