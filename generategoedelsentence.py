@@ -51,7 +51,7 @@ save(p,'p_stage1.txt')
 
 p=None
 
-# replace n1 - n256 in p with n0 and succ()
+# replace n1 - n256 in p with n0 and sc()
 infile=open('p_stage1.txt','r')
 outfile=open('p_stage2.txt','w')
 replace256(infile,outfile)
@@ -88,7 +88,7 @@ g='!'+vx+':'+ac.composeformula(formulae,freevariables)
 
 save(g,'g_stage1.txt')
 
-# replace n1 - n256 with n0 and succ()
+# replace n1 - n256 with n0 and sc()
 infile=open('g_stage1.txt','r')
 outfile=open('g_stage2.txt','w')
 replace256(infile,outfile)

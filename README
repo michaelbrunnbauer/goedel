@@ -3,18 +3,18 @@ generategoedelsentence.py will generate the first stage of the Gödel sentence,
 which is 12GB big. You will need more memory than this to run it.
 
 If you have terabytes of memory and plenty of time, you can generate the Gödel
-sentence itself, which - according to my estimate - should be ca. 2 terabyte
-big.
+sentence itself, which - according to my estimate - should be at least
+2 terabyte big.
 
 The codebase enables creation of functions based on expressions, primitive
 recursion and more unrestricted forms of recursion that can be reduced to
 primitive recursion. It is possible to automatically print the primitive 
 recursive definitions, compute with the functions and to reduce a term
-composed of these functions to a elementary formula consisting only of 0,
+composed of these functions to an elementary formula consisting only of 0,
 the successor, addition and multiplication.
 
-The latter is needed for the Gödel sentence because it cannot contain undefined
-symbols.
+The latter is needed for the Gödel sentence because it has to be provable
+or unprovable by itself and therefore should only contain elementary symbols.
 
 Author: Michael Brunnbauer, brunni@netestate.de
 
@@ -215,8 +215,8 @@ using computation on its Gödel number.
 Use testsuite.py to run a testsuite.
 
 Use elementaryformula.py to convert a term into a almost elementary formula 
-using only n0-n256, su(), ad() and mu() - almost because the symbols
-n1-n256 are not elementary but can easily be replaced with succ() and n0.
+using only n0-n256, sc(), ad() and mu() - almost because the symbols
+n1-n256 are not elementary but can easily be replaced with sc() and n0.
 
 Use generategoedelsentence.py to generate the first stage of the Gödel
 sentence, which is: !x:isvalidprooffor(x,subst_formula(y,[y],number(y)))=0
