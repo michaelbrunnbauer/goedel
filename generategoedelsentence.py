@@ -41,10 +41,10 @@ freevariables=[]
 # of term
 term1=ac.getterm1(parsedterm,formulae,ind,freevariables)
 # the value of term should be 0
-formulae.append(term1+'=n0')
+formulae.append(term1+'=n1')
 # now build the conjunction of all generated formulae, bind all free
 # variables to the existential quantifier and generalize over vx
-p='!'+vx+':'+ac.composeformula(formulae,freevariables)
+p='!'+vx+':~'+ac.composeformula(formulae,freevariables)
 
 # we have p, save it
 save(p,'p_stage1.txt')
@@ -83,8 +83,8 @@ parsedterm=parseterm.parseterm(term)
 formulae=[]
 freevariables=[]
 term1=ac.getterm1(parsedterm,formulae,ind,freevariables)
-formulae.append(term1+'=n0')
-g='!'+vx+':'+ac.composeformula(formulae,freevariables)
+formulae.append(term1+'=n1')
+g='!'+vx+':~'+ac.composeformula(formulae,freevariables)
 
 save(g,'g_stage1.txt')
 
