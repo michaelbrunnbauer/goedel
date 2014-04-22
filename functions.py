@@ -181,7 +181,8 @@ class basefunction(object):
         id=ind.new()
         freevariables.append(id)
         ic=ind.new()
-        rueck='~!'+ic+':~'+params[0]+'=ad(mu('+params[1]+','+ic+'),'+id+')'
+        zi=ind.new()
+        rueck='~!'+ic+':!'+zi+':~('+params[0]+'=ad(mu('+params[1]+','+ic+'),'+id+')&ad('+id+',sc('+zi+'))='+params[1]+')'
         formulae.append(rueck)
         return id
 
@@ -364,7 +365,7 @@ class primitive_recursive_function(basefunction):
         rueck=self.composeformula(myformulae,myfreevariables)
 
         zi=ind.new()
-        smallerf='~!'+zi+':ad('+ii+',sc('+zi+'))='+params[0]
+        smallerf='~!'+zi+':~ad('+ii+',sc('+zi+'))='+params[0]
 
         rueck='!'+ii+':~('+smallerf+'&~'+rueck+')'
         formulae.append(rueck)
