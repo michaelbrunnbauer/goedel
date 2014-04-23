@@ -58,7 +58,7 @@ replace256(infile,outfile)
 infile.close()
 outfile.close()
 
-# p is 12GB big, so we stop here
+# p is 19GB big, so we stop here
 sys.exit(0)
 
 # this is how we would go on 
