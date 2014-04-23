@@ -1,10 +1,10 @@
 
 generategoedelsentence.py will generate the first stage of the Gödel sentence,
-which is 12GB big. You will need more memory than this to run it.
+which is 19GB big. You will need more memory than this to run it.
 
 If you have terabytes of memory and plenty of time, you can generate the Gödel
 sentence itself, which - according to my estimate - should be at least
-2 terabyte big.
+4 terabyte big.
 
 The codebase enables creation of functions based on expressions, primitive
 recursion and more unrestricted forms of recursion that can be reduced to

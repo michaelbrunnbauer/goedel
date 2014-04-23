@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/python64/bin/python
 
 import sys
 import parseterm
