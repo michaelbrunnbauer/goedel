@@ -75,7 +75,7 @@ p=gn_chunked(p)
 p=base256(p)
 
 # generate the goedel sentence
-# size factor = 2
+# size factor > 2 * 16
 
 ind=parseterm.vindex()
 vx=ind.new()
