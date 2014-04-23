@@ -5,6 +5,7 @@ numbers[0]='n0'
 for i in range(1,257):
     numbers[i]='sc('+numbers[i-1]+')'
 
+# replace n1-n256 in formula with expressions using n0 and sc()
 def replace256(instream,outstream):
     word=''
     while True:

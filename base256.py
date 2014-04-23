@@ -1,4 +1,5 @@
 
+# express n as term using n0-n256, ad(), mu() and pow()
 def base256(n):
     converted=''
     exp=0
