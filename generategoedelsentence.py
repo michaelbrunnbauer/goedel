@@ -1,4 +1,4 @@
-#!/usr/local/python64/bin/python
+#!/usr/bin/python
 
 import sys
 import parseterm
@@ -71,9 +71,11 @@ f.close()
 p=gn_chunked(p)
 
 # generate [p] as term using n0-n256, ad(), mu() and pow()
+# size factor > 30
 p=base256(p)
 
 # generate the goedel sentence
+# size factor = 2
 
 ind=parseterm.vindex()
 vx=ind.new()
@@ -89,6 +91,7 @@ g='!'+vx+':~'+ac.composeformula(formulae,freevariables)
 save(g,'g_stage1.txt')
 
 # replace n1 - n256 with n0 and sc()
+# size factor > 4
 infile=open('g_stage1.txt','r')
 outfile=open('g_stage2.txt','w')
 replace256(infile,outfile)
