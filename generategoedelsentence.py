@@ -91,7 +91,7 @@ g='!'+vx+':~'+ac.composeformula(formulae,freevariables)
 save(g,'g_stage1.txt')
 
 # replace n1 - n256 with n0 and sc()
-# size factor > 14
+# size factor > 4
 infile=open('g_stage1.txt','r')
 outfile=open('g_stage2.txt','w')
 replace256(infile,outfile)

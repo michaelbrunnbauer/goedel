@@ -23,15 +23,20 @@ def base256(n):
 # express n as formulae using n0-n256, ad(), mu()
 def base256_formula(n,ind,formulae,freevariables):
     converted=''
-    mi=ind.new()
-    freevariables.append(mi)
-    formulae.append(mi+'=n256')
-    vi='n1'
+    numbers={}
+    last='n0'
+    for i in range(1,257):
+        mi=ind.new()
+        freevariables.append(mi)
+        numbers[i]=mi
+        formulae.append(mi+'=succ('+last+')')
+        last=mi
+
+    vi=numbers[1]
     while n:
         m = n % 256
         if m:
-            m=str(m)
-            add='mu(n'+m+','+vi+')'
+            add='mu('+numbers[m]+','+vi+')'
             if converted:
                 converted='ad('+converted+','+add+')'
             else:
@@ -40,7 +45,7 @@ def base256_formula(n,ind,formulae,freevariables):
         if n:
             vi1=ind.new()
             freevariables.append(vi1)
-            formulae.append(vi1+'=mu('+mi+','+vi+')')
+            formulae.append(vi1+'=mu('+numbers[256]+','+vi+')')
             vi=vi1
     vi=ind.new()
     freevariables.append(vi)
