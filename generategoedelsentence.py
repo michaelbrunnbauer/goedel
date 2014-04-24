@@ -71,20 +71,19 @@ f.close()
 p=gn_chunked(p)
 
 # generate [p] as term using n0-n256, ad(), mu() and pow()
-# size factor > 30
-p=base256(p)
-
-# generate the goedel sentence
-# size factor > 2 * 16
-# could be cut in half by using a variable for p
-
+# size factor > 38
 ind=parseterm.vindex()
-vx=ind.new()
-# the goedel sentence is for all vx: not term=1
-term='isvalidprooffor('+vx+',subst_formula('+p+',n'+str(gvk)+',number('+p+')))'
-parsedterm=parseterm.parseterm(term)
 formulae=[]
 freevariables=[]
+vp=base256_formula(p,ind,formulae,freevariables)
+
+# generate the goedel sentence
+# size factor 1
+
+vx=ind.new()
+# the goedel sentence is for all vx: not term=1
+term='isvalidprooffor('+vx+',subst_formula('+vp+',n'+str(gvk)+',number('+vp+')))'
+parsedterm=parseterm.parseterm(term)
 term1=ac.getterm1(parsedterm,formulae,ind,freevariables)
 formulae.append(term1+'=n1')
 g='!'+vx+':~'+ac.composeformula(formulae,freevariables)
@@ -92,7 +91,7 @@ g='!'+vx+':~'+ac.composeformula(formulae,freevariables)
 save(g,'g_stage1.txt')
 
 # replace n1 - n256 with n0 and sc()
-# size factor > 4
+# size factor > 14
 infile=open('g_stage1.txt','r')
 outfile=open('g_stage2.txt','w')
 replace256(infile,outfile)

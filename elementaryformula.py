@@ -19,6 +19,6 @@ v=ac.getterm2(l,variables,ind,formulae,freevariables)
 if not formulae:
     print v
 else:
-    print "the result is in variable",v
+    print "the result is",v
     formula=ac.composeformula(formulae,freevariables)
     print formula
