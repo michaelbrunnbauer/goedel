@@ -76,6 +76,7 @@ p=base256(p)
 
 # generate the goedel sentence
 # size factor > 2 * 16
+# could be cut in half by using a variable for p
 
 ind=parseterm.vindex()
 vx=ind.new()
