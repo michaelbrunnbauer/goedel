@@ -70,7 +70,7 @@ f.close()
 # goedelize p
 p=gn_chunked(p)
 
-# generate [p] as term using n0-n256, ad(), mu() and pow()
+# generate [p] as formulae using n0-n256, ad() and mu()
 # size factor > 38
 ind=parseterm.vindex()
 formulae=[]
