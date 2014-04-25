@@ -70,11 +70,12 @@ f.close()
 # goedelize p
 p=gn_chunked(p)
 
-# generate [p] as formulae using n0-n256, ad() and mu()
+# generate [p] with formulae using n0-n256, ad() and mu()
 # size factor > 38
 ind=parseterm.vindex()
 formulae=[]
 freevariables=[]
+# the result is in variable vp
 vp=base256_formula(p,ind,formulae,freevariables)
 
 # generate the goedel sentence
