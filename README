@@ -219,4 +219,4 @@ using only n0-n256, sc(), ad() and mu() - almost because the symbols
 n1-n256 are not elementary but can easily be replaced with sc() and n0.
 
 Use generategoedelsentence.py to generate the first stage of the Gödel
-sentence, which is: !x:isvalidprooffor(x,subst_formula(y,[y],number(y)))=0
+sentence.
